@@ -1,0 +1,2 @@
+# Hello, Graphics!
+This repository is a place to experiment with computer graphics. Here we do the graphics equivalent of "Hello, World!" The code is entirely self contained since the goal of the project is to reproduce a graphics pipeline purely in software from the ground up. The pipeline takes a collection of vertices, triangles, lighting data, and color data as input, renders it, and produces an image file as output. Since the pipeline is entirely in software, we require an alternative means of displaying the output.
