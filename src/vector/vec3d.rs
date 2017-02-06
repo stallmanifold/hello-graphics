@@ -319,6 +319,29 @@ impl<'a, T> ops::Index<usize> for &'a Vec3d<T> where T: Copy {
     }
 }
 
+impl<'a, T> ops::Index<usize> for &'a mut Vec3d<T> where T: Copy {
+    type Output = T;
+
+    fn index(&self, index: usize) -> &T {
+        &self.inner[index]
+    }
+}
+
+impl<T> ops::IndexMut<usize> for Vec3d<T> where T: Copy {
+    fn index_mut(&mut self, index: usize) -> &mut T {
+        &mut self.inner[index]
+    }
+}
+
+impl<'a, T> ops::IndexMut<usize> for &'a mut Vec3d<T> where T: Copy {
+    fn index_mut(&mut self, index: usize) -> &mut T {
+        &mut self.inner[index]
+    }
+}
+
+pub type Vec3df = Vec3d<f32>;
+pub type Vec3dd = Vec3d<f64>;
+
 
 #[cfg(test)]
 mod tests {
@@ -406,6 +429,3 @@ mod tests {
         }
     }
 }
-
-pub type Vec3df = Vec3d<f32>;
-pub type Vec3dd = Vec3d<f64>;

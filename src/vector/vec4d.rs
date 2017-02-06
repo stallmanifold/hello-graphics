@@ -344,6 +344,9 @@ impl<'a, T> ops::Index<usize> for &'a Vec4d<T> where T: Copy {
     }
 }
 
+pub type Vec4df = Vec4d<f32>;
+pub type Vec4dd = Vec4d<f64>;
+
 
 #[cfg(test)]
 mod tests {
@@ -431,6 +434,3 @@ mod tests {
         }
     }
 }
-
-pub type Vec4df = Vec4d<f32>;
-pub type Vec4dd = Vec4d<f64>;
