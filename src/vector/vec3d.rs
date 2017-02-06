@@ -17,6 +17,11 @@ impl<T> Vec3d<T> where T: Copy {
             inner: [x,y,z]
         }
     }
+
+    #[inline]
+    pub fn dim(&self) -> usize {
+        3
+    }
 }
 
 impl<T> Vec3d<T> where T: Copy + ops::Add<T, Output=T> + ops::Mul<T, Output=T> {
@@ -262,6 +267,30 @@ impl<'a, T> ops::DivAssign<T> for &'a mut Vec3d<T> where T: Copy + ops::Div<T, O
         self.inner[0] = self.inner[0] / scalar;
         self.inner[1] = self.inner[1] / scalar;
         self.inner[2] = self.inner[2] / scalar;
+    }
+}
+
+impl<T> ops::Neg for Vec3d<T> where T: Copy + ops::Neg<Output=T> {
+    type Output = Vec3d<T>;
+
+    fn neg(self) -> Vec3d<T> {
+        let x = -self.inner[0];
+        let y = -self.inner[1];
+        let z = -self.inner[2];
+
+        vec3d(x, y, z)
+    }
+}
+
+impl<'a, T> ops::Neg for &'a Vec3d<T> where T: Copy + ops::Neg<Output=T> {
+    type Output = Vec3d<T>;
+
+    fn neg(self) -> Vec3d<T> {
+        let x = -self.inner[0];
+        let y = -self.inner[1];
+        let z = -self.inner[2];
+
+        vec3d(x, y, z)
     }
 }
 

@@ -20,6 +20,11 @@ impl<T> Vec2d<T> where T: Copy {
             inner: [x,y]
         }
     }
+
+    #[inline]
+    pub fn dim(&self) -> usize {
+        2
+    }
 }
 
 impl<T> Vec2d<T> where T: Copy + ops::Add<T, Output=T> + ops::Mul<T, Output=T> {
@@ -229,6 +234,28 @@ impl<'a, T> ops::DivAssign<T> for &'a mut Vec2d<T> where T: Copy + ops::Div<T, O
     fn div_assign(&mut self, other: T) {
         self.inner[0] = self.inner[0] / other;
         self.inner[1] = self.inner[1] / other;
+    }
+}
+
+impl<T> ops::Neg for Vec2d<T> where T: Copy + ops::Neg<Output=T> {
+    type Output = Vec2d<T>;
+
+    fn neg(self) -> Vec2d<T> {
+        let x = -self.inner[0];
+        let y = -self.inner[1];
+
+        vec2d(x, y)
+    }
+}
+
+impl<'a, T> ops::Neg for &'a Vec2d<T> where T: Copy + ops::Neg<Output=T> {
+    type Output = Vec2d<T>;
+
+    fn neg(self) -> Vec2d<T> {
+        let x = -self.inner[0];
+        let y = -self.inner[1];
+
+        vec2d(x, y)
     }
 }
 
