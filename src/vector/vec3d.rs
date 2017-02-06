@@ -38,6 +38,15 @@ impl<T> Vec3d<T> where T: Copy + ops::Add<T, Output=T> + ops::Mul<T, Output=T> {
     }
 }
 
+impl<T> Vec3d<T> where T: Copy + ops::Add<T, Output=T> 
+                               + ops::Mul<T, Output=T> 
+                               + ops::Div<T, Output=T> 
+{
+    fn normalize(&self) -> Vec3d<T> {
+        self / self.norm()
+    }
+}
+
 impl Vec3d<f32> {
     pub fn length(&self) -> f32 {
         f32::sqrt(self.norm())
@@ -294,6 +303,22 @@ impl<'a, T> ops::Neg for &'a Vec3d<T> where T: Copy + ops::Neg<Output=T> {
     }
 }
 
+impl<T> ops::Index<usize> for Vec3d<T> where T: Copy {
+    type Output = T;
+
+    fn index(&self, index: usize) -> &T {
+        &self.inner[index]
+    }
+}
+
+impl<'a, T> ops::Index<usize> for &'a Vec3d<T> where T: Copy {
+    type Output = T;
+
+    fn index(&self, index: usize) -> &T {
+        &self.inner[index]
+    }
+}
+
 
 #[cfg(test)]
 mod tests {
@@ -381,3 +406,6 @@ mod tests {
         }
     }
 }
+
+pub type Vec3df = Vec3d<f32>;
+pub type Vec3dd = Vec3d<f64>;
