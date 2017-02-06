@@ -9,7 +9,10 @@ pub struct Matrix4x4<T> where T: Copy {
     rows: [[T; 4]; 4]
 }
 
-impl<T> Matrix4x4<T> where T: Copy + ops::Add<T, Output=T> + ops::Mul<T, Output=T> {
+impl<T> Matrix4x4<T> where T: Copy + ops::Add<T, Output=T> 
+                                   + ops::Mul<T, Output=T> 
+                                   + ops::Div<T, Output=T> 
+{
     #[inline(always)]
     fn new(a00: T, a01: T, a02: T, a03: T, 
            a10: T, a11: T, a12: T, a13: T,
@@ -91,6 +94,17 @@ impl<T> Matrix4x4<T> where T: Copy + ops::Add<T, Output=T> + ops::Mul<T, Output=
         (*dest)[1] = y;
         (*dest)[2] = z;
     }
+
+    pub fn vec_disp_multiply(&self, src: &Vec3d<T>, dest: &mut Vec3d<T>) {
+        let x = src[0] * self[0][0] + src[1] * self[1][0] + src[2] * self[2][0] + self[0][3];
+        let y = src[0] * self[0][1] + src[1] * self[1][1] + src[2] * self[2][1] + self[1][3];
+        let z = src[0] * self[0][2] + src[1] * self[1][2] + src[2] * self[2][2] + self[2][3];
+        let w = src[0] * self[0][3] + src[1] * self[1][3] + src[2] * self[2][3] + self[3][3];
+
+        (*dest)[0] = x / w;
+        (*dest)[1] = y / w;
+        (*dest)[2] = z / w;
+    }
 }
 
 impl<T> ops::Index<usize> for Matrix4x4<T> where T: Copy {
@@ -115,3 +129,61 @@ impl<T> ops::IndexMut<usize> for Matrix4x4<T> where T: Copy {
     }
 }
 
+impl<T> ops::Mul<Matrix4x4<T>> for Matrix4x4<T> 
+    where T: Copy + ops::Add<T, Output=T> + ops::Mul<T, Output=T> + ops::Div<T, Output=T>
+{
+    type Output = Matrix4x4<T>;
+
+    fn mul(self, other: Matrix4x4<T>) -> Self::Output {
+        let a00 = self[0][0];
+        let mut scratch = Matrix4x4::new(a00, a00, a00, a00, 
+                                         a00, a00, a00, a00,
+                                         a00, a00, a00, a00, 
+                                         a00, a00, a00, a00);
+        self.multiply(&other, &mut scratch);
+
+        scratch
+    }
+}
+
+impl<'a, T> ops::Mul<Matrix4x4<T>> for &'a Matrix4x4<T> 
+    where T: Copy + ops::Add<T, Output=T> + ops::Mul<T, Output=T> + ops::Div<T, Output=T>
+{
+    type Output = Matrix4x4<T>;
+
+    fn mul(self, other: Matrix4x4<T>) -> Self::Output {
+        let a00 = self[0][0];
+        let mut scratch = Matrix4x4::new(a00, a00, a00, a00, 
+                                         a00, a00, a00, a00,
+                                         a00, a00, a00, a00, 
+                                         a00, a00, a00, a00);
+        self.multiply(&other, &mut scratch);
+
+        scratch
+    }
+}
+
+impl<'a, 'b, T> ops::Mul<&'a Matrix4x4<T>> for &'b Matrix4x4<T> 
+    where T: Copy + ops::Add<T, Output=T> + ops::Mul<T, Output=T> + ops::Div<T, Output=T>
+{
+    type Output = Matrix4x4<T>;
+
+    fn mul(self, other: &Matrix4x4<T>) -> Self::Output {
+        let a00 = self[0][0];
+        let mut scratch = Matrix4x4::new(a00, a00, a00, a00, 
+                                         a00, a00, a00, a00,
+                                         a00, a00, a00, a00, 
+                                         a00, a00, a00, a00);
+        self.multiply(&other, &mut scratch);
+
+        scratch
+    }
+}
+
+impl<T> ops::MulAssign for Matrix4x4<T> 
+    where T: Copy + ops::Add<T, Output=T> + ops::Mul<T, Output=T> + ops::Div<T, Output=T>
+{   
+    fn mul_assign(&mut self, other: Matrix4x4<T>) {
+
+    }
+}
