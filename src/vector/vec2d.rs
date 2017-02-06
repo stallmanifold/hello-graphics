@@ -14,7 +14,7 @@ pub struct Vec2d<T> where T: Copy {
 
 
 impl<T> Vec2d<T> where T: Copy {
-    #[inline]
+    #[inline(always)]
     pub fn new(x: T, y: T) -> Vec2d<T> {
         Vec2d {
             inner: [x,y]
@@ -298,7 +298,6 @@ mod tests {
             ]
         }
     }
-
 
     #[test]
     fn test_addition() {
