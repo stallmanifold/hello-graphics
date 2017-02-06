@@ -1,17 +1,19 @@
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
-pub struct Vec3d<T> {
+pub struct Vec4d<T> {
     pub x: T,
     pub y: T,
-    pub z: T
+    pub z: T,
+    pub w: T
 }
 
-impl<T> Vec3d<T> {
+impl<T> Vec4d<T> {
     #[inline]
-    pub fn new(x: T, y: T, z: T) -> Vec3d<T> {
-        Vec3d {
+    pub fn new(x: T, y: T, z: T, w: T) -> Vec4d<T> {
+        Vec4d {
             x: x,
             y: y,
-            z: z
+            z: z,
+            w: w
         }
     }
 }
@@ -65,7 +67,7 @@ impl<'a, T> ops::Add<Vec3d<T>> for &'a Vec3d<T> where T: Copy + ops::Add<T, Outp
 impl<'a, T> ops::Add<&'a Vec3d<T>> for Vec3d<T> where T: Copy + ops::Add<T, Output=T> {
     type Output = Vec3d<T>;
 
-    fn add(self, other: Vec3d<T>) -> Vec3d<T> {
+    fn add(self, other: &Vec3d<T>) -> Vec3d<T> {
         let x: T = self.x + other.x;
         let y: T = self.y + other.y;
         let z: T = self.z + other.z;
