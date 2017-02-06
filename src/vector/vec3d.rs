@@ -268,5 +268,87 @@ impl<'a, T> ops::DivAssign<T> for &'a mut Vec3d<T> where T: Copy + ops::Div<T, O
 
 #[cfg(test)]
 mod tests {
-    
+    struct TestCase<T> where T: Copy {
+        vec1: super::Vec3d<T>,
+        vec2: super::Vec3d<T>,
+        vec3: super::Vec3d<T>,
+    }
+
+    struct Test<T> where T: Copy {
+        inner: Vec<TestCase<T>>
+    }
+
+    fn three_dim_integer_add_test_cases() -> Test<isize> {
+        Test {
+            inner: vec![
+                TestCase {
+                    vec1: super::vec3d(-56, -74, -83),
+                    vec2: super::vec3d(-11, -93, 96),
+                    vec3: super::vec3d(-67, -167, 13),
+                },
+                TestCase {
+                    vec1: super::vec3d(34, 70, 17),
+                    vec2: super::vec3d(49, -49, -33),
+                    vec3: super::vec3d(83, 21, -16),
+                },
+                TestCase {
+                    vec1: super::vec3d(62, -53, 6),
+                    vec2: super::vec3d(8, -19, -29),
+                    vec3: super::vec3d(70, -72, -23),
+                },
+                TestCase {
+                    vec1: super::vec3d(-34, -17, -63),
+                    vec2: super::vec3d(-32, 41, -6),
+                    vec3: super::vec3d(-66, 24, -69),
+                },
+            ]
+        }
+    }
+
+    fn three_dim_integer_sub_test_cases() -> Test<isize> {
+        Test {
+            inner: vec![
+                TestCase {
+                    vec1: super::vec3d(-56, -74, -83),
+                    vec2: super::vec3d(-11, -93, 96),
+                    vec3: super::vec3d(-45, 19, -179),
+                },
+                TestCase {
+                    vec1: super::vec3d(34, 70, 17),
+                    vec2: super::vec3d(49, -49, -33),
+                    vec3: super::vec3d(34-49, 70-(-49), 17-(-33)),
+                },
+                TestCase {
+                    vec1: super::vec3d(62, -53, 6),
+                    vec2: super::vec3d(8, -19, -29),
+                    vec3: super::vec3d(62-8, -53-(-19), 6-(-29)),
+                },
+                TestCase {
+                    vec1: super::vec3d(-34, -17, -63),
+                    vec2: super::vec3d(-32, 41, -6),
+                    vec3: super::vec3d(-34-(-32), -17-41, -63-(-6)),
+                },
+            ]
+        }
+    }
+
+    #[test]
+    fn test_addition() {
+        let tests = three_dim_integer_add_test_cases();
+        for test in tests.inner {
+            let res = test.vec1 + test.vec2;
+
+            assert_eq!(res, test.vec3);
+        }
+    }
+
+    #[test]
+    fn test_subtraction() {
+        let tests = three_dim_integer_sub_test_cases();
+        for test in tests.inner {
+            let res = test.vec1 - test.vec2;
+            
+            assert_eq!(res, test.vec3);
+        }
+    }
 }
