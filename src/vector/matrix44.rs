@@ -194,3 +194,44 @@ impl<T> ops::MulAssign for Matrix4x4<T>
         *self = scratch;
     }
 }
+
+impl Matrix4x4<f32> {
+    pub fn identity() -> Matrix4x4<f32> {
+        Matrix4x4::new(
+            1.0, 0.0, 0.0, 0.0,
+            0.0, 1.0, 0.0, 0.0,
+            0.0, 0.0, 1.0, 0.0,
+            0.0, 0.0, 0.0, 1.0
+        )
+    }
+
+    pub fn zero() -> Matrix4x4<f32> {
+        Matrix4x4::new(
+            0.0, 0.0, 0.0, 0.0,
+            0.0, 0.0, 0.0, 0.0,
+            0.0, 0.0, 0.0, 0.0,
+            0.0, 0.0, 0.0, 0.0
+        )
+    }
+}
+
+impl Matrix4x4<f64> {
+    pub fn identity() -> Matrix4x4<f64> {
+        Matrix4x4::new(
+            1.0, 0.0, 0.0, 0.0,
+            0.0, 1.0, 0.0, 0.0,
+            0.0, 0.0, 1.0, 0.0,
+            0.0, 0.0, 0.0, 1.0
+        )
+    }
+
+    pub fn zero() -> Matrix4x4<f64> {
+        Matrix4x4::new(
+            0.0, 0.0, 0.0, 0.0,
+            0.0, 0.0, 0.0, 0.0,
+            0.0, 0.0, 0.0, 0.0,
+            0.0, 0.0, 0.0, 0.0
+        )
+    }
+}
+
