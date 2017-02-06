@@ -184,6 +184,13 @@ impl<T> ops::MulAssign for Matrix4x4<T>
     where T: Copy + ops::Add<T, Output=T> + ops::Mul<T, Output=T> + ops::Div<T, Output=T>
 {   
     fn mul_assign(&mut self, other: Matrix4x4<T>) {
+        let a00 = self[0][0];
+        let mut scratch = Matrix4x4::new(a00, a00, a00, a00, 
+                                         a00, a00, a00, a00,
+                                         a00, a00, a00, a00, 
+                                         a00, a00, a00, a00);
+        self.multiply(&other, &mut scratch);
 
+        *self = scratch;
     }
 }
