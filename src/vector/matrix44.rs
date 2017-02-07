@@ -4,7 +4,7 @@ use vector::vec3d::Vec3d;
 
 // We do matrices in row-major order, which is typical. Note
 // that OpenGL does column-major order.
-#[derive(Copy, Clone, Debug, PartialEq, Eq)]
+#[derive(Copy, Clone, Debug, Hash, PartialEq, Eq)]
 pub struct Matrix4x4<T> where T: Copy {
     rows: [[T; 4]; 4]
 }
@@ -233,5 +233,105 @@ impl Matrix4x4<f64> {
             0.0, 0.0, 0.0, 0.0
         )
     }
+
+    // In a practical implementation it may be necessary to heap allocate 
+    // the matrices and put them behind a Box.
+    pub fn inverse(&self) -> Option<Matrix4x4<T>> {
+        //Matrix44 s;
+        let mut scratch = self.clone(); Matrix44 t (*this);
+        
+        // Forward elimination
+        for i in 0..self.len() {
+        //for (i = 0; i < 3 ; i++) {
+            //int pivot = i;
+            let mut pivot = i;
+
+            T pivot_size = scratch[i][i];
+            
+            if (pivotsize < 0)
+                pivot_size = -pivot_size;
+                
+                /*
+                for (j = i + 1; j < 4; j++) {
+                    T tmp = t[j][i];
+                    
+                    if (tmp < 0)
+                        tmp = -tmp;
+                        
+                        if (tmp > pivotsize) {
+                            pivot = j;
+                            pivotsize = tmp;
+                        }
+                }
+                */
+                for j in (i + 1)..4 {
+                    let temp = scratch[j][i];
+
+                    if 
+                } 
+            if pivot_size == 0 {
+                // Cannot invert singular matrix
+                return None;
+            }
+            
+            if (pivot != i) {
+                for (j = 0; j < 4; j++) {
+                    T tmp;
+                    
+                    tmp = t[i][j];
+                    t[i][j] = t[pivot][j];
+                    t[pivot][j] = tmp;
+                    
+                    tmp = s[i][j];
+                    s[i][j] = s[pivot][j];
+                    s[pivot][j] = tmp;
+                }
+            }
+            
+            for (j = i + 1; j < 4; j++) {
+                T f = t[j][i] / t[i][i];
+                
+                for (k = 0; k < 4; k++) {
+                    t[j][k] -= f * t[i][k];
+                    s[j][k] -= f * s[i][k];
+                }
+            }
+        }
+        
+        // Backward substitution
+        for (i = 3; i >= 0; --i) {
+            T f;
+            
+            if ((f = t[i][i]) == 0) {
+                // Cannot invert singular matrix
+                return Matrix44();
+            }
+            
+            for (j = 0; j < 4; j++) {
+                t[i][j] /= f;
+                s[i][j] /= f;
+            }
+            
+            for (j = 0; j < i; j++) {
+                f = t[j][i];
+                
+                for (k = 0; k < 4; k++) {
+                    t[j][k] -= f * t[i][k];
+                    s[j][k] -= f * s[i][k];
+                }
+            }
+        }
+        
+        return s;
+    }
+
+    pub fn invert(&mut self) {
+        let inv = self.inverse();
+
+        *self = inv;
+    }
 }
+
+pub type Matrix4x4f = Matrix4x4<f32>;
+pub type Matrix4x4d = Matrix4x4<f64>;
 
