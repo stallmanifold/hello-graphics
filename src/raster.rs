@@ -160,14 +160,14 @@ pub fn viewport<N>(num_x: usize, num_y: usize) -> Matrix4<N>
     let two  = one + one;
 
     let mut _num_x = zero;
-    for i in 0..num_x {
+    for _ in 0..num_x {
         _num_x += one;
     }
 
     let mut _num_y = zero;
-    for i in 0..num_y {
+    for _ in 0..num_y {
         _num_y += one;
-    };
+    }
 
     let m11 = _num_x / two;
     let m21 = zero;
