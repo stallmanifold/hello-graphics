@@ -35,10 +35,27 @@ pub fn perspective<N>(near: N, far: N) -> Matrix4<N>
     let zero = N::zero();
     let one = N::one();
 
-    Matrix4::new(near, zero, zero,       zero,
-                 zero, near, zero,       zero,
-                 zero, zero, near + far, one,
-                 zero, zero, -far*near,  zero)
+    let m11 = near;
+    let m21 = zero;
+    let m31 = zero;
+    let m41 = zero;
+    let m12 = zero;
+    let m22 = near;
+    let m32 = zero;
+    let m42 = zero;
+    let m13 = zero;
+    let m23 = zero;
+    let m33 = near + far;
+    let m43 = one;
+    let m14 = zero;
+    let m24 = zero;
+    let m34 = -far * near;
+    let m44 = zero; 
+
+    Matrix4::new(m11, m21, m31, m41,
+                 m12, m22, m32, m42,
+                 m13, m23, m33, m43,
+                 m14, m24, m34, m44)
 }
 
 /// Convert from projected coordinates to the canonical view 
@@ -109,3 +126,50 @@ pub fn perspective_project<N>(left: N, right: N, top: N,
                  m14, m24, m34, m44)
 }
 
+/// Compute the viewport, (windowing) transformation. This takes vertices
+/// from the canonical view volume (projection coordinates) to pixel coordinates.
+/// This depends only on the width of the image (to be used for calculating colors in 
+/// the frame buffer). Note that the viewport transformation is a special case of 
+/// an orthographic (length preserving) transformation. This casts vertices into the
+/// coordinate system [-0.5, n_x - 0.5] x [-0.5, n_y - 0.5], where n_x is the number 
+/// of pixels going in the x-direction, and n_y is the number of pixels going in the 
+/// y-direction, i.e. (n_x, n_y) is the resolution of the screen.
+pub fn viewport<N>(num_x: usize, num_y: usize) -> Matrix4<N>
+    where N: Copy + BaseFloat
+{
+    let zero = N::zero();
+    let one  = N::one();
+    let two  = one + one;
+
+    let mut _num_x = zero;
+    for i in 0..num_x {
+        _num_x += one;
+    }
+
+    let mut _num_y = zero;
+    for i in 0..num_y {
+        _num_y += one;
+    };
+
+    let m11 = _num_x / two;
+    let m21 = zero;
+    let m31 = zero;
+    let m41 = zero;
+    let m12 = zero;
+    let m22 = _num_y / two;
+    let m32 = zero;
+    let m42 = zero;
+    let m13 = zero;
+    let m23 = zero;
+    let m33 = one;
+    let m43 = zero;
+    let m14 = (_num_x - one) / two;
+    let m24 = (_num_y - one) / two;
+    let m34 = zero;
+    let m44 = one;
+
+    Matrix4::new(m11, m21, m31, m41,
+                 m12, m22, m32, m42,
+                 m13, m23, m33, m43,
+                 m14, m24, m34, m44)
+}
