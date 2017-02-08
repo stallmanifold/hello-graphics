@@ -1,9 +1,11 @@
 extern crate nalgebra;
+extern crate num_traits;
 
 use nalgebra::{Matrix4, Vector4, Vector3, Point3, Point4, Transpose, ToHomogeneous};
 use std::convert::From;
 
 mod raster;
+mod util;
 
 fn main() {
     let m = Matrix4::from(&[[1.0, 0.0, 0.0, 2.0], 

@@ -1,9 +1,11 @@
 use nalgebra::{Vector3, Vector4, Point3, Point4, Matrix4};
 use nalgebra::{Cross, Norm, BaseFloat};
+use num_traits::Float;
+use util;
 
 
 /// Generate the camera transformation from the given data.
-pub fn world_to_camera<N>(eye: Point3<N>, gaze: Vector3<N>, top: Vector3<N>) -> Matrix4<N>
+pub fn world_to_camera_matrix<N>(eye: Point3<N>, gaze: Vector3<N>, top: Vector3<N>) -> Matrix4<N>
     where N: Copy + BaseFloat
 {
     // The vectors are all cast into homogeneous coordinates here. Points are affected
@@ -45,7 +47,7 @@ pub fn world_to_camera<N>(eye: Point3<N>, gaze: Vector3<N>, top: Vector3<N>) -> 
 
 /// Generate the perspective matrix from creating perspective projection
 /// transformations. This is for looking down the -z axis.
-pub fn perspective<N>(near: N, far: N) -> Matrix4<N>
+pub fn perspective_matrix<N>(near: N, far: N) -> Matrix4<N>
     where N: Copy + BaseFloat 
 {
     assert!(near > far);
@@ -78,7 +80,7 @@ pub fn perspective<N>(near: N, far: N) -> Matrix4<N>
 
 /// Convert from projected coordinates to the canonical view 
 /// volume [-1, 1] x [-1, 1] x [-1, 1].
-pub fn orthographic<N>(left: N, right: N, top: N, 
+pub fn orthographic_matrix<N>(left: N, right: N, top: N, 
                        bottom: N, near: N, far: N) -> Matrix4<N> 
     where N: Copy + BaseFloat
 {
@@ -113,7 +115,7 @@ pub fn orthographic<N>(left: N, right: N, top: N,
 
 /// Perspective projection transformation. This takes us from camera coordinates to
 /// the canonical view volume.
-pub fn perspective_project<N>(left: N, right: N, top: N, 
+pub fn perspective_projection_matrix<N>(left: N, right: N, top: N, 
                               bottom: N, near: N, far: N) -> Matrix4<N> 
     where N: Copy + BaseFloat
 {
@@ -152,7 +154,7 @@ pub fn perspective_project<N>(left: N, right: N, top: N,
 /// coordinate system [-0.5, n_x - 0.5] x [-0.5, n_y - 0.5], where n_x is the number 
 /// of pixels going in the x-direction, and n_y is the number of pixels going in the 
 /// y-direction, i.e. (n_x, n_y) is the resolution of the screen.
-pub fn viewport<N>(num_x: usize, num_y: usize) -> Matrix4<N>
+pub fn viewport_matrix<N>(num_x: usize, num_y: usize) -> Matrix4<N>
     where N: Copy + BaseFloat
 {
     let zero = N::zero();
@@ -204,8 +206,33 @@ pub fn world_to_raster_matrix<N>(left: N,
                                  image_height: usize) -> Matrix4<N> 
     where N: Copy + BaseFloat
 {
-    let pp_matrix: Matrix4<N> = perspective_project(left, right, top, bottom, near, far);
-    let vp_matrix: Matrix4<N> = viewport(image_width, image_height);
+    let pp_matrix: Matrix4<N> = perspective_projection_matrix(left, right, top, bottom, near, far);
+    let vp_matrix: Matrix4<N> = viewport_matrix(image_width, image_height);
 
     vp_matrix * pp_matrix
+}
+
+pub struct BoundingBox<N> {
+    pub x_min: N,
+    pub x_max: N,
+    pub y_min: N,
+    pub y_max: N
+}
+
+pub fn bounding_box<N>(p1: &Point3<N>,
+                       p2: &Point3<N>,
+                       p3: &Point3<N>) -> BoundingBox<N>
+    where N: Copy + Ord + BaseFloat
+{
+    let x_min = util::min3(p1.x, p2.x, p3.x);
+    let x_max = util::max3(p1.x, p2.x, p3.x);
+    let y_min = util::min3(p1.y, p2.y, p3.y);
+    let y_max = util::max3(p1.y, p2.y, p3.y);
+
+    BoundingBox {
+        x_min: x_min,
+        x_max: x_max,
+        y_min: y_min,
+        y_max: y_max
+    }   
 }
