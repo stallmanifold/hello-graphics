@@ -75,3 +75,37 @@ pub fn orthographic<N>(left: N, right: N, top: N,
                  m13, m23, m33, m43,
                  m14, m24, m34, m44)
 }
+
+/// Perspective projection transformation. This takes us from camera coordinates to
+/// the canonical view volume.
+pub fn perspective_project<N>(left: N, right: N, top: N, 
+                              bottom: N, near: N, far: N) -> Matrix4<N> 
+    where N: Copy + BaseFloat
+{
+    let zero = N::zero();
+    let one = N::one();
+    let two = one + one;
+
+    let m11 = (two * near) / (right - left);
+    let m21 = zero;
+    let m31 = zero;
+    let m41 = zero;
+    let m12 = zero;
+    let m22 = (two * near) / (top - bottom);
+    let m32 = zero;
+    let m42 = zero;
+    let m13 = (left + right) / (left - right);
+    let m23 = (bottom + top) / (bottom - top);
+    let m33 = (far + near) / (near - far);
+    let m43 = one;
+    let m14 = zero;
+    let m24 = zero;
+    let m34 = (two * far * near) / (far - near);
+    let m44 = zero;
+
+    Matrix4::new(m11, m21, m31, m41,
+                 m12, m22, m32, m42,
+                 m13, m23, m33, m43,
+                 m14, m24, m34, m44)
+}
+
