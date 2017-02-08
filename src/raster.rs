@@ -9,20 +9,38 @@ pub fn world_to_camera<N>(eye: Point3<N>, gaze: Vector3<N>, top: Vector3<N>) -> 
     // The vectors are all cast into homogeneous coordinates here. Points are affected
     // by translation, so `eye` has a `1` in its fourth component, while vectors are
     // not affected by translation, so they have a `0` in their fourth components.
+    let zero = N::zero();
+    let one = N::one();
+    
     let w = -gaze / gaze.norm();
     let top_cross_w = top.cross(&w);
     let u = top_cross_w / top_cross_w.norm();
     let v = w.cross(&u);
-    let zero = N::zero();
-    let one = N::one();
+
+    let m11 = u.x;
+    let m21 = v.x;
+    let m31 = w.x;
+    let m41 = zero;
+    let m12 = u.y;
+    let m22 = v.y;
+    let m32 = w.y;
+    let m42 = zero;
+    let m13 = u.z;
+    let m23 = v.z;
+    let m33 = w.z;
+    let m43 = zero;
+    let m14 = -eye.x;
+    let m24 = -eye.y;
+    let m34 = -eye.z;
+    let m44 = one;
 
     // Transformations in graphics tend to be 4x4 so we can take advantage 
     // of homogeneous coordinates. This converts translations from affine transformations
     // to linear ones in one greater dimension.
-    Matrix4::new(u.x,  v.x,  w.x,  -eye.x,
-                 u.y,  v.y,  w.y,  -eye.y,
-                 u.z,  v.z,  w.z,  -eye.z,
-                 zero, zero, zero,  one  )
+    Matrix4::new(m11, m21, m31, m41,
+                 m12, m22, m32, m42,
+                 m13, m23, m33, m43,
+                 m14, m24, m34, m44)
 }
 
 /// Generate the perspective matrix from creating perspective projection
