@@ -3,6 +3,7 @@ use nalgebra::{Cross, Norm, BaseFloat};
 use num_traits::Float;
 use util;
 
+/// TODO: Check divisions for zeros in matrix code.
 
 /// Generate the camera transformation from the given data.
 pub fn world_to_camera_matrix<N>(eye: Point3<N>, gaze: Vector3<N>, top: Vector3<N>) -> Matrix4<N>
@@ -80,8 +81,12 @@ pub fn perspective_matrix<N>(near: N, far: N) -> Matrix4<N>
 
 /// Convert from projected coordinates to the canonical view 
 /// volume [-1, 1] x [-1, 1] x [-1, 1].
-pub fn orthographic_matrix<N>(left: N, right: N, top: N, 
-                       bottom: N, near: N, far: N) -> Matrix4<N> 
+pub fn orthographic_matrix<N>(left: N, 
+                              right: N, 
+                              top: N, 
+                              bottom: N, 
+                              near: N, 
+                              far: N) -> Matrix4<N> 
     where N: Copy + BaseFloat
 {
     assert!(near > far);
@@ -115,8 +120,12 @@ pub fn orthographic_matrix<N>(left: N, right: N, top: N,
 
 /// Perspective projection transformation. This takes us from camera coordinates to
 /// the canonical view volume.
-pub fn perspective_projection_matrix<N>(left: N, right: N, top: N, 
-                              bottom: N, near: N, far: N) -> Matrix4<N> 
+pub fn perspective_projection_matrix<N>(left: N, 
+                                        right: N,
+                                        top: N, 
+                                        bottom: N, 
+                                        near: N, 
+                                        far: N) -> Matrix4<N> 
     where N: Copy + BaseFloat
 {
     let zero = N::zero();
@@ -219,15 +228,18 @@ pub struct BoundingBox<N> {
     pub y_max: N
 }
 
+/// Given a triangle primitive, this function computers the bounding bounding_box
+/// on the screen for that primitive. This function does not take into account 
+/// the boundaries of the image frame.
 pub fn bounding_box<N>(p1: &Point3<N>,
                        p2: &Point3<N>,
                        p3: &Point3<N>) -> BoundingBox<N>
     where N: Copy + Ord + BaseFloat
 {
-    let x_min = util::min3(p1.x, p2.x, p3.x);
-    let x_max = util::max3(p1.x, p2.x, p3.x);
-    let y_min = util::min3(p1.y, p2.y, p3.y);
-    let y_max = util::max3(p1.y, p2.y, p3.y);
+    let x_min = util::min3(p1.x, p2.x, p3.x).floor();
+    let x_max = util::max3(p1.x, p2.x, p3.x).ceil();
+    let y_min = util::min3(p1.y, p2.y, p3.y).floor();
+    let y_max = util::max3(p1.y, p2.y, p3.y).ceil();
 
     BoundingBox {
         x_min: x_min,
@@ -235,4 +247,30 @@ pub fn bounding_box<N>(p1: &Point3<N>,
         y_min: y_min,
         y_max: y_max
     }   
+}
+
+/// Compute on which side of a triangle edge a point is on. They are defined such that
+/// They are iterated in clockwise order. This way a point is positive if it lies
+/// entirely within the triangle.
+pub fn compute_edge<N>(v1: &Point3<N>, 
+                       v2: &Point3<N>,
+                        p: &Point3<N>) -> N
+    where N: Copy + BaseFloat
+{
+    (p.x - v1.x)*(v2.y - v1.y) - (p.y - v1.y)*(v2.x - v1.x)
+}
+
+/// Compute the coordinates of a ray in barycentric coordinates. The coordinates
+/// `v1`, `v2, and `v3` are assumed to be in clockwise order.
+pub fn barycentric_coords<N>(v1: &Point3<N>,
+                             v2: &Point3<N>,
+                             v3: &Point3<N>,
+                              p: &Point3<N>) -> Point3<N>
+    where N: Copy + BaseFloat
+{
+    let w1 = compute_edge(v1, v2, p);
+    let w2 = compute_edge(v2, v3, p);
+    let w3 = compute_edge(v3, v1, p);
+
+    Point3::new(w1, w2, w3)
 }
