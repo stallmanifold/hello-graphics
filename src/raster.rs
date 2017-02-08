@@ -274,3 +274,11 @@ pub fn barycentric_coords<N>(v1: &Point3<N>,
 
     Point3::new(w1, w2, w3)
 }
+
+pub fn compute_area<N>(v1: &Point3<N>,
+                       v2: &Point3<N>,
+                       v3: &Point3<N>,) -> N
+    where N: Copy + BaseFloat
+{
+    compute_edge(v1, v2, v3)
+}
