@@ -159,30 +159,32 @@ pub fn viewport<N>(num_x: usize, num_y: usize) -> Matrix4<N>
     let one  = N::one();
     let two  = one + one;
 
-    let mut _num_x = zero;
+    // Approximate num_x using type N.
+    let mut image_width = zero;
     for _ in 0..num_x {
-        _num_x += one;
+        image_width += one;
     }
 
-    let mut _num_y = zero;
+    // Approximate num_y using type N.
+    let mut image_height = zero;
     for _ in 0..num_y {
-        _num_y += one;
+        image_height += one;
     }
 
-    let m11 = _num_x / two;
+    let m11 = image_width / two;
     let m21 = zero;
     let m31 = zero;
     let m41 = zero;
     let m12 = zero;
-    let m22 = _num_y / two;
+    let m22 = image_height / two;
     let m32 = zero;
     let m42 = zero;
     let m13 = zero;
     let m23 = zero;
     let m33 = one;
     let m43 = zero;
-    let m14 = (_num_x - one) / two;
-    let m24 = (_num_y - one) / two;
+    let m14 = (image_width - one) / two;
+    let m24 = (image_height - one) / two;
     let m34 = zero;
     let m44 = one;
 
@@ -190,4 +192,20 @@ pub fn viewport<N>(num_x: usize, num_y: usize) -> Matrix4<N>
                  m12, m22, m32, m42,
                  m13, m23, m33, m43,
                  m14, m24, m34, m44)
+}
+
+pub fn world_to_raster_matrix<N>(left: N, 
+                                 right: N, 
+                                 top: N, 
+                                 bottom: N, 
+                                 near: N, 
+                                 far: N, 
+                                 image_width: usize, 
+                                 image_height: usize) -> Matrix4<N> 
+    where N: Copy + BaseFloat
+{
+    let pp_matrix: Matrix4<N> = perspective_project(left, right, top, bottom, near, far);
+    let vp_matrix: Matrix4<N> = viewport(image_width, image_height);
+
+    vp_matrix * pp_matrix
 }
