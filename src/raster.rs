@@ -7,7 +7,7 @@ use std::ops;
 
 /// Generate the camera transformation from the given data.
 pub fn world_to_camera_matrix<N>(eye: Point3<N>, gaze: Vector3<N>, top: Vector3<N>) -> Matrix4<N>
-    where N: Copy + BaseFloat
+    where N: BaseFloat
 {
     // The vectors are all cast into homogeneous coordinates here. Points are affected
     // by translation, so `eye` has a `1` in its fourth component, while vectors are
@@ -49,7 +49,7 @@ pub fn world_to_camera_matrix<N>(eye: Point3<N>, gaze: Vector3<N>, top: Vector3<
 /// Generate the perspective matrix from creating perspective projection
 /// transformations. This is for looking down the -z axis.
 pub fn perspective_matrix<N>(near: N, far: N) -> Matrix4<N>
-    where N: Copy + BaseFloat 
+    where N: BaseFloat 
 {
     assert!(near > far);
 
@@ -79,8 +79,9 @@ pub fn perspective_matrix<N>(near: N, far: N) -> Matrix4<N>
                  m14, m24, m34, m44)
 }
 
+/// Constructs a translation matrix from a three-dimensional vector. 
 pub fn translation_matrix<N>(eye: &Vector3<N>) -> Matrix4<N>
-    where N: Copy + BaseFloat
+    where N: BaseFloat
 {
     let zero = N::zero();
     let one = N::one();
@@ -116,7 +117,7 @@ pub fn orthographic_matrix<N>(left: N,
                               bottom: N, 
                               near: N, 
                               far: N) -> Matrix4<N> 
-    where N: Copy + BaseFloat
+    where N: BaseFloat
 {
     assert!(near > far);
 
@@ -155,7 +156,7 @@ pub fn perspective_projection_matrix<N>(left: N,
                                         bottom: N, 
                                         near: N, 
                                         far: N) -> Matrix4<N> 
-    where N: Copy + BaseFloat
+    where N: BaseFloat
 {
     let zero = N::zero();
     let one = N::one();
@@ -193,7 +194,7 @@ pub fn perspective_projection_matrix<N>(left: N,
 /// of pixels going in the x-direction, and n_y is the number of pixels going in the 
 /// y-direction, i.e. (n_x, n_y) is the resolution of the screen.
 pub fn viewport_matrix<N>(num_x: usize, num_y: usize) -> Matrix4<N>
-    where N: Copy + BaseFloat
+    where N: BaseFloat
 {
     let zero = N::zero();
     let one  = N::one();
@@ -242,7 +243,7 @@ pub fn world_to_raster_matrix<N>(left: N,
                                  far: N, 
                                  image_width: usize, 
                                  image_height: usize) -> Matrix4<N> 
-    where N: Copy + BaseFloat
+    where N: BaseFloat
 {
     let pp_matrix: Matrix4<N> = perspective_projection_matrix(left, right, top, bottom, near, far);
     let vp_matrix: Matrix4<N> = viewport_matrix(image_width, image_height);
@@ -263,7 +264,7 @@ pub struct BoundingBox<N> {
 pub fn bounding_box<N>(p1: &Point3<N>,
                        p2: &Point3<N>,
                        p3: &Point3<N>) -> BoundingBox<N>
-    where N: Copy + Ord + BaseFloat
+    where N: Ord + BaseFloat
 {
     let x_min = util::min3(p1.x, p2.x, p3.x).floor();
     let x_max = util::max3(p1.x, p2.x, p3.x).ceil();
@@ -284,7 +285,7 @@ pub fn bounding_box<N>(p1: &Point3<N>,
 pub fn compute_edge<N>(v1: &Point3<N>, 
                        v2: &Point3<N>,
                         p: &Point3<N>) -> N
-    where N: Copy + BaseFloat
+    where N: BaseFloat
 {
     (p.x - v1.x)*(v2.y - v1.y) - (p.y - v1.y)*(v2.x - v1.x)
 }
@@ -295,7 +296,7 @@ pub fn barycentric_coords<N>(v0: &Point3<N>,
                              v1: &Point3<N>,
                              v2: &Point3<N>,
                               p: &Point3<N>) -> Point3<N>
-    where N: Copy + BaseFloat
+    where N: BaseFloat
 {
     let w0 = compute_edge(v0, v1, p);
     let w1 = compute_edge(v1, v2, p);
@@ -307,7 +308,7 @@ pub fn barycentric_coords<N>(v0: &Point3<N>,
 pub fn compute_area<N>(v0: &Point3<N>,
                        v1: &Point3<N>,
                        v2: &Point3<N>,) -> N
-    where N: Copy + BaseFloat
+    where N: BaseFloat
 {
     compute_edge(v0, v1, v2)
 }
@@ -330,7 +331,7 @@ pub struct ZBuffer<N> {
     buf: Vec<Vec<N>>,
 }
 
-impl<N> ZBuffer<N> where N: Copy + BaseFloat {
+impl<N> ZBuffer<N> where N: BaseFloat {
     pub fn new(width: usize, height: usize) -> ZBuffer<N> {
         let mut z_buffer = ZBuffer {
             width: width,
@@ -415,6 +416,22 @@ impl FrameBuffer {
 
     pub fn height(&self) -> usize {
         self.height
+    }
+
+    pub fn dump_frame(&self, other_buf: &mut [u8]) -> Option<usize> {
+        if other_buf.len() >= 3 * self.height * self.width {
+            for i in 0..self.height {
+                for j in 0..self.width {
+                    other_buf[self.width * i + j]   = self.buf[i][j][0]; 
+                    other_buf[self.width * i + j+1] = self.buf[i][j][1];
+                    other_buf[self.width * i + j+2] = self.buf[i][j][2];
+                }
+            }
+
+            Some(3 * self.height * self.width)
+        } else {
+            None
+        }
     }
 }
 

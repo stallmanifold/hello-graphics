@@ -1,5 +1,6 @@
 extern crate nalgebra;
 extern crate num_traits;
+extern crate image;
 
 mod raster;
 mod util;
@@ -7,8 +8,9 @@ mod shade;
 
 use nalgebra::{Matrix4, Vector4, Vector3, Point3, Point4, Transpose, ToHomogeneous};
 use std::convert::From;
+use std::path::Path;
 use raster::ZBuffer;
-
+use image::ColorType;
 
 // TODO: Add perspective correction to gouraud model.
 
@@ -23,6 +25,9 @@ fn main() {
     let width: usize = 512;
     let height: usize = 512;
 
+    // Project triangle into screen.
+    // TODO: convert to raster coordinates.
+
     let mut z_buffer: Box<ZBuffer<f32>> = raster::z_buffer(width, height);
     let mut frame_buffer = raster::frame_buffer(width, height);
 
@@ -31,22 +36,25 @@ fn main() {
     for i in 0..height {
         for j in 0..width {
             let pixel = Point3::new((i as f32) + 0.5, (height - j) as f32 + 0.5, 0.0);
-            //let mut w0 = raster::compute_edge(&v1, &v2, &pixel);
-            //let mut w1 = raster::compute_edge(&v2, &v0, &pixel);
-            //let mut w2 = raster::compute_edge(&v0, &v1, &pixel);
             let mut w = raster::barycentric_coords(&v0, &v1, &v2, &pixel);
             if (w[0] >= 0.0) && (w[1] >= 0.0) && (w[2] >= 0.0) {
-                //w0 /= area;
-                //w1 /= area;
-                //w2 /= area;
                 w /= area;
                 let color = shade::gouraud(c0, c1, c2, w);
                 let rgb = shade::rgb_color(color);
-                //let r = w0 * c0.x + w1 * c1.x + w2 * c2.x;
-                //let g = w0 * c0.y + w1 * c1.y + w2 * c2.y;
-                //let b = w0 * c0.z + w1 * c2.z + w2 * c2.z;
                 frame_buffer[i][j] = rgb;
             }
         }
     }
+
+    let mut buf: Vec<u8> = Vec::with_capacity(3 * height * width);
+    for i in 0..buf.capacity() {
+        buf.push(0x00);
+    }
+
+    frame_buffer.dump_frame(&mut buf)
+                .expect("Something went wrong!");
+
+    let path = Path::new("./triangle.png");
+    image::save_buffer(&path, buf.as_ref(), width as u32, height as u32, ColorType::RGB(8))
+          .expect("Something went wrong with saving the image!");
 }
