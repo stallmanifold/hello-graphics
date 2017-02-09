@@ -1,7 +1,8 @@
-use nalgebra::{Vector3, Vector4, Point3, Point4, Matrix4};
+use nalgebra::{Vector3, Point3, Matrix4};
 use nalgebra::{Cross, Norm, BaseFloat};
 use util;
 use std::ops;
+use color::Rgb;
 
 /// TODO: Check divisions for zeros in matrix code.
 
@@ -313,8 +314,6 @@ pub fn compute_area<N>(v0: &Point3<N>,
     compute_edge(v0, v1, v2)
 }
 
-pub type Rgb = [u8; 3];
-
 /// Return an initialized heap-allocated z-buffer.
 pub fn z_buffer<N: Copy + BaseFloat>(width: usize, height: usize) -> Box<ZBuffer<N>> {
     let mut z_buffer = Box::new(ZBuffer::new(width, height));
@@ -405,7 +404,7 @@ impl FrameBuffer {
     pub fn initialize(&mut self) {
         for i in 0..self.height {
             for _ in 0..self.width {
-                self.buf[i].push([0 as u8; 3]);
+                self.buf[i].push(Rgb::from_channels(0,0,0));
             }
         }
     }

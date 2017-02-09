@@ -5,14 +5,24 @@ extern crate image;
 mod raster;
 mod util;
 mod shade;
+mod color;
 
 use nalgebra::{Matrix4, Vector4, Vector3, Point3, Point4, Transpose, ToHomogeneous};
-use std::convert::From;
 use std::path::Path;
 use raster::ZBuffer;
 use image::ColorType;
+use color::Rgb;
 
 // TODO: Add perspective correction to gouraud model.
+
+fn make_buffer(size: usize) -> Box<Vec<u8>> {
+    let mut buf = Box::new(Vec::with_capacity(size));
+    for i in 0..buf.capacity() {
+        buf.push(0x00);
+    }
+
+    buf
+}
 
 fn main() {
     let v2: Point3<f32>  = Point3::new(-48.0, -10.0, 82.0);
@@ -46,12 +56,9 @@ fn main() {
         }
     }
 
-    let mut buf: Vec<u8> = Vec::with_capacity(3 * height * width);
-    for i in 0..buf.capacity() {
-        buf.push(0x00);
-    }
+    let mut buf = make_buffer(Rgb::channel_width() * height * width);
 
-    frame_buffer.dump_frame(&mut buf)
+    frame_buffer.dump_frame(&mut *buf)
                 .expect("Something went wrong!");
 
     let path = Path::new("./triangle.png");
