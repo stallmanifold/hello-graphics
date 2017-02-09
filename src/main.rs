@@ -1,6 +1,6 @@
 extern crate nalgebra;
-//extern crate num_traits;
 extern crate image;
+extern crate num_traits;
 
 mod raster;
 mod util;

@@ -1,11 +1,12 @@
-use std::cmp;
+use num_traits::Float;
+
 
 /// Calculate the minimum of three different items.
-pub fn min3<T: Ord>(x: T, y: T, z: T) -> T {
-    cmp::min(cmp::min(x, y), z)
+pub fn min3<N: Float>(x: N, y: N, z: N) -> N {
+    Float::min(Float::min(x, y), z)
 }
 
 // Calculate the maximum of three different items.
-pub fn max3<T: Ord>(x: T, y: T, z: T) -> T {
-    cmp::max(cmp::max(x, y), z)
+pub fn max3<N: Float>(x: N, y: N, z: N) -> N {
+    Float::max(Float::max(x, y), z)
 }

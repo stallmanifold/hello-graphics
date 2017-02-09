@@ -6,4 +6,5 @@ authors = ["Stallmanifold <stallmanifold@gmail.com>"]
 [dependencies]
 nalgebra = "0.10.1"
 num = "0.1.36"
+num-traits = "0.1.36"
 image = "0.12.2"

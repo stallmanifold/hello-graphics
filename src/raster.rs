@@ -1,5 +1,6 @@
 use nalgebra::{Vector3, Point3, Matrix4};
 use nalgebra::{Cross, Norm, BaseFloat};
+use num_traits::Float;
 use util;
 use std::ops;
 use color::Rgb;
@@ -265,7 +266,7 @@ pub struct BoundingBox<N> {
 pub fn bounding_box<N>(p1: &Point3<N>,
                        p2: &Point3<N>,
                        p3: &Point3<N>) -> BoundingBox<N>
-    where N: Ord + BaseFloat
+    where N: BaseFloat
 {
     let x_min = util::min3(p1.x, p2.x, p3.x).floor();
     let x_max = util::max3(p1.x, p2.x, p3.x).ceil();
@@ -370,6 +371,31 @@ impl<N> ZBuffer<N> where N: BaseFloat {
     pub fn height(&self) -> usize {
         self.height
     }
+
+    fn lines(&self) -> ZBufferLineIter<N> {
+        ZBufferLineIter {
+            index: 0,
+            lines: &self.buf
+        }
+    }
+}
+
+struct ZBufferLineIter<'a, N: 'a> {
+    index: usize,
+    lines: &'a [Vec<N>],
+}
+
+impl<'a, N: 'a> Iterator for ZBufferLineIter<'a, N> {
+    type Item = &'a [N];
+
+    fn next(&mut self) -> Option<Self::Item> {
+        self.index += 1;
+        if self.index < self.lines.len() {
+            Some(&self.lines[self.index])
+        } else {
+            None
+        }
+    }
 }
 
 /// Return an initialized heap allocated frame buffer.
@@ -432,6 +458,31 @@ impl FrameBuffer {
             None
         }
     }
+
+    fn scanlines(&self) -> ScanlineIter {
+        ScanlineIter {
+            index: 0,
+            lines: &self.buf
+        }
+    }
+}
+
+struct ScanlineIter<'a> {
+    index: usize,
+    lines: &'a [Vec<Rgb>],
+}
+
+impl<'a> Iterator for ScanlineIter<'a> {
+    type Item = &'a [Rgb];
+
+    fn next(&mut self) -> Option<Self::Item> {
+        self.index += 1;
+        if self.index < self.lines.len() {
+            Some(&self.lines[self.index])
+        } else {
+            None
+        }
+    }
 }
 
 impl ops::Index<usize> for FrameBuffer {
@@ -458,5 +509,82 @@ impl ops::IndexMut<usize> for FrameBuffer {
 
 #[cfg(test)]
 mod tests {
-    // The moment of truth comes here.
+    use nalgebra::{Vector3, Point3};
+    use color::Rgb;
+
+
+    #[test]
+    fn test_bounding_box_should_bound_a_primitive() {
+        let v0: Point3<f32>  = Point3::new(-48.0, -10.0, 82.0);
+        let v1: Point3<f32>  = Point3::new(29.0, -15.0, 44.0);
+        let v2: Point3<f32>  = Point3::new(13.0, 34.0, 114.0);
+
+        let bbox = super::bounding_box(&v0, &v1, &v2);
+        let vertices = vec![v0, v1, v2];
+
+        for vertex in vertices {
+            assert!(bbox.x_min <= vertex.x);
+            assert!(bbox.x_max >= vertex.x);
+            assert!(bbox.y_min <= vertex.y);
+            assert!(bbox.y_max >= vertex.y);
+        }
+    }
+
+    #[test]
+    fn test_frame_buffer_should_correctly_report_dimensions() {
+        let width  = 512;
+        let height = 512;
+        let buf = super::frame_buffer(width, height);
+
+        assert_eq!(buf.width(), width);
+        assert_eq!(buf.height(), height);
+
+        for line in buf.scanlines() {
+            assert_eq!(line.len(), buf.width());
+        }
+    }
+
+    #[test]
+    fn test_frame_buffer_should_be_zero_after_initialization() {
+        let width  = 512;
+        let height = 512;
+        let buf  = super::frame_buffer(width, height);
+        let zero = Rgb::from_channels(0,0,0);
+
+        for line in buf.scanlines() {
+            for pixel in line {
+                assert_eq!(pixel, &zero);
+            }
+        }
+    }
+
+    #[test]
+    fn test_z_buffer_should_correctly_report_dimensions() {
+        let width  = 512;
+        let height = 512;
+        let buf = super::z_buffer::<f32>(width, height);
+
+        assert_eq!(buf.width(), width);
+        assert_eq!(buf.height(), height);
+
+        for line in buf.lines() {
+            assert_eq!(line.len(), buf.width());
+        }
+    }
+
+    #[test]
+    fn test_z_buffer_should_have_only_infinite_values_after_initialization() {
+        use num_traits::Float;
+
+        let width  = 512;
+        let height = 512;
+        let buf = super::z_buffer::<f32>(width, height);
+        let inf: f32 = Float::infinity();
+
+        for line in buf.lines() {
+            for pixel in line {
+                assert_eq!(pixel, &inf);
+            }
+        }
+    }
 }
