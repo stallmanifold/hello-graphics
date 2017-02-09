@@ -6,6 +6,7 @@ use std::convert::From;
 
 mod raster;
 mod util;
+mod shading;
 
 fn main() {
     let m = Matrix4::from(&[[1.0, 0.0, 0.0, 2.0], 

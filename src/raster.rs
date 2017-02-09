@@ -282,3 +282,46 @@ pub fn compute_area<N>(v1: &Point3<N>,
 {
     compute_edge(v1, v2, v3)
 }
+
+pub type Rgb = [u8; 3];
+
+/// Use a floating point ZBuffer for right now.
+/// TODO: Convert to an integer Z-Buffer.
+pub struct ZBuffer<N> {
+    buf: Vec<N>,
+}
+
+impl<N> ZBuffer<N> where N: Copy + BaseFloat {
+    pub fn new(width: usize, height: usize) -> ZBuffer<N> {
+        ZBuffer {
+            buf: Vec::with_capacity(height * width)
+        }
+    }
+
+    pub fn initialize(&mut self) {
+        // TODO: Put an infinite value into each slot here.
+    }
+}
+
+pub struct FrameBuffer {
+    buf: Vec<Rgb>,
+}
+
+impl FrameBuffer {
+    pub fn new(width: usize, height: usize) -> FrameBuffer {
+        FrameBuffer {
+            buf: Vec::with_capacity(height * width)
+        }
+    }
+
+    pub fn initialize(&mut self) {
+        for i in 0..self.buf.len() {
+            self.buf[i] = [0 as u8; 3];
+        }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    // The moment of truth comes here.
+}
