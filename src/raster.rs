@@ -1,6 +1,5 @@
 use nalgebra::{Vector3, Vector4, Point3, Point4, Matrix4};
 use nalgebra::{Cross, Norm, BaseFloat};
-use num_traits::Float;
 use util;
 use std::ops;
 
@@ -291,26 +290,26 @@ pub fn compute_edge<N>(v1: &Point3<N>,
 }
 
 /// Compute the coordinates of a ray in barycentric coordinates. The coordinates
-/// `v1`, `v2, and `v3` are assumed to be in clockwise order.
-pub fn barycentric_coords<N>(v1: &Point3<N>,
+/// `v0`, `v1`, and `v2` are assumed to be in clockwise order.
+pub fn barycentric_coords<N>(v0: &Point3<N>,
+                             v1: &Point3<N>,
                              v2: &Point3<N>,
-                             v3: &Point3<N>,
                               p: &Point3<N>) -> Point3<N>
     where N: Copy + BaseFloat
 {
+    let w0 = compute_edge(v0, v1, p);
     let w1 = compute_edge(v1, v2, p);
-    let w2 = compute_edge(v2, v3, p);
-    let w3 = compute_edge(v3, v1, p);
+    let w2 = compute_edge(v2, v0, p);
 
-    Point3::new(w1, w2, w3)
+    Point3::new(w0, w1, w2)
 }
 
-pub fn compute_area<N>(v1: &Point3<N>,
-                       v2: &Point3<N>,
-                       v3: &Point3<N>,) -> N
+pub fn compute_area<N>(v0: &Point3<N>,
+                       v1: &Point3<N>,
+                       v2: &Point3<N>,) -> N
     where N: Copy + BaseFloat
 {
-    compute_edge(v1, v2, v3)
+    compute_edge(v0, v1, v2)
 }
 
 pub type Rgb = [u8; 3];
@@ -403,8 +402,8 @@ impl FrameBuffer {
     }
 
     pub fn initialize(&mut self) {
-        for i in 0..self.buf.len() {
-            for _ in 0..self.buf[0].len() {
+        for i in 0..self.height {
+            for _ in 0..self.width {
                 self.buf[i].push([0 as u8; 3]);
             }
         }
