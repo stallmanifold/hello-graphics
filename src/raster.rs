@@ -315,6 +315,14 @@ pub fn compute_area<N>(v1: &Point3<N>,
 
 pub type Rgb = [u8; 3];
 
+/// Return an initialized heap-allocated z-buffer.
+pub fn z_buffer<N: Copy + BaseFloat>(width: usize, height: usize) -> Box<ZBuffer<N>> {
+    let mut z_buffer = Box::new(ZBuffer::new(width, height));
+    z_buffer.initialize();
+
+    z_buffer
+}
+
 /// Use a floating point ZBuffer for right now.
 /// TODO: Convert to an integer Z-Buffer.
 pub struct ZBuffer<N> {
@@ -331,8 +339,16 @@ impl<N> ZBuffer<N> where N: Copy + BaseFloat {
             buf: Vec::with_capacity(height)
         };
 
-        for i in 0..z_buffer.buf.len() {
-            z_buffer.buf[i] = Vec::with_capacity(width);
+        for _ in 0..z_buffer.height {
+            z_buffer.buf.push(Vec::with_capacity(width));
+        }
+
+        let zero = N::zero();
+
+        for i in 0..z_buffer.height {
+            for _ in 0..z_buffer.width {
+                z_buffer.buf[i].push(zero);
+            }
         }
 
         z_buffer
@@ -357,6 +373,14 @@ impl<N> ZBuffer<N> where N: Copy + BaseFloat {
     }
 }
 
+/// Return an initialized heap allocated frame buffer.
+pub fn frame_buffer(width: usize, height: usize) -> Box<FrameBuffer> {
+    let mut frame_buffer = Box::new(FrameBuffer::new(width, height));
+    (&mut (*frame_buffer)).initialize();
+
+    frame_buffer
+}
+
 pub struct FrameBuffer {
     width: usize,
     height: usize,
@@ -371,8 +395,8 @@ impl FrameBuffer {
             buf: Vec::with_capacity(height)
         };
 
-        for i in 0..frame_buffer.buf.len() {
-            frame_buffer.buf[i] = Vec::with_capacity(width);
+        for _ in 0..frame_buffer.height {
+            frame_buffer.buf.push(Vec::with_capacity(width));
         }
 
         frame_buffer
@@ -380,8 +404,8 @@ impl FrameBuffer {
 
     pub fn initialize(&mut self) {
         for i in 0..self.buf.len() {
-            for j in 0..self.buf[0].len() {
-                self.buf[i][j] = [0 as u8; 3];
+            for _ in 0..self.buf[0].len() {
+                self.buf[i].push([0 as u8; 3]);
             }
         }
     }

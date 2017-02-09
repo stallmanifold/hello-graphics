@@ -1,12 +1,16 @@
 extern crate nalgebra;
 extern crate num_traits;
 
-use nalgebra::{Matrix4, Vector4, Vector3, Point3, Point4, Transpose, ToHomogeneous};
-use std::convert::From;
-
 mod raster;
 mod util;
 mod shading;
+
+use nalgebra::{Matrix4, Vector4, Vector3, Point3, Point4, Transpose, ToHomogeneous};
+use std::convert::From;
+use raster::ZBuffer;
+
+
+// TODO: Add perspective correction to giraud model.
 
 fn main() {
     let v2: Vector3<f32> = Vector3::new(-48.0, -10.0, 82.0);
@@ -18,4 +22,7 @@ fn main() {
 
     let width: usize = 512;
     let height: usize = 512;
+
+    let mut z_buffer: Box<ZBuffer<f32>> = raster::z_buffer(width, height);
+    let mut frame_buffer = raster::frame_buffer(width, height);
 }
