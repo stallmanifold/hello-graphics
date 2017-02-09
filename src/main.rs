@@ -40,7 +40,7 @@ fn main() {
             if (w[0] >= 0.0) && (w[1] >= 0.0) && (w[2] >= 0.0) {
                 w /= area;
                 let color = shade::gouraud(c0, c1, c2, w);
-                let rgb = shade::rgb_color(color);
+                let rgb = shade::color_rgb(color);
                 frame_buffer[i][j] = rgb;
             }
         }

@@ -13,7 +13,7 @@ pub fn gouraud<N>(color0: Vector3<N>,
     color0 * bary[0] + color1 * bary[1] + color2 * bary[2]
 }
 
-pub fn rgb_color(color: Vector3<f32>) -> [u8; 3] {
+pub fn color_rgb(color: Vector3<f32>) -> [u8; 3] {
     let r = (255.0 * color.x).trunc() as u8;
     let g = (255.0 * color.y).trunc() as u8;
     let b = (255.0 * color.z).trunc() as u8;
