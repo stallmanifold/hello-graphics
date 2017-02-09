@@ -2,6 +2,7 @@ use nalgebra::{Vector3, Vector4, Point3, Point4, Matrix4};
 use nalgebra::{Cross, Norm, BaseFloat};
 use num_traits::Float;
 use util;
+use std::ops;
 
 /// TODO: Check divisions for zeros in matrix code.
 
@@ -332,6 +333,28 @@ impl FrameBuffer {
                 self.buf[i][j] = [0 as u8; 3];
             }
         }
+    }
+}
+
+impl ops::Index<usize> for FrameBuffer {
+    type Output = Vec<Rgb>;
+
+    fn index(&self, index: usize) -> &Vec<Rgb> {
+        &self.buf[index]
+    } 
+}
+
+impl<'a> ops::Index<usize> for &'a FrameBuffer {
+    type Output = Vec<Rgb>;
+
+    fn index(&self, index: usize) -> &Vec<Rgb> {
+        &self.buf[index]
+    } 
+}
+
+impl ops::IndexMut<usize> for FrameBuffer {
+    fn index_mut(&mut self, index: usize) -> &mut Self::Output {
+        &mut self.buf[index]
     }
 }
 
