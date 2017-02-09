@@ -124,8 +124,8 @@ pub fn orthographic_matrix<N>(left: N,
     assert!(near > far);
 
     let zero = N::zero();
-    let one = N::one();
-    let two = one + one;
+    let one  = N::one();
+    let two  = one + one;
 
     let m11 = two / (right - left);
     let m21 = zero;
@@ -139,9 +139,9 @@ pub fn orthographic_matrix<N>(left: N,
     let m23 = zero;
     let m33 = two / (near - far);
     let m43 = zero;
-    let m14 = -(right + left) / (right - left);
-    let m24 = -(top + bottom) / (top - bottom);
-    let m34 = -(near + far) / (near - far);
+    let m14 = -((right + left) / (right - left));
+    let m24 = -((top + bottom) / (top - bottom));
+    let m34 = -((near + far) / (near - far));
     let m44 = one; 
 
     Matrix4::new(m11, m21, m31, m41,
@@ -237,6 +237,7 @@ pub fn viewport_matrix<N>(num_x: usize, num_y: usize) -> Matrix4<N>
                  m14, m24, m34, m44)
 }
 
+/// Generate a matrix to convert from world space to raster space.
 pub fn world_to_raster_matrix<N>(left: N, 
                                  right: N, 
                                  top: N, 
@@ -509,8 +510,15 @@ impl ops::IndexMut<usize> for FrameBuffer {
 
 #[cfg(test)]
 mod tests {
-    use nalgebra::{Vector3, Point3};
+    use nalgebra::{Vector3, 
+                   Point3,
+                   Point4,
+                   ApproxEq, 
+                   BaseFloat, 
+                   Transpose,
+                   ToHomogeneous};
     use color::Rgb;
+    use std::ops::Mul;
 
 
     #[test]
@@ -586,5 +594,67 @@ mod tests {
                 assert_eq!(pixel, &inf);
             }
         }
+    }
+
+    #[test]
+    fn test_perspective_matrix_equation_should_satisfy() {
+        let left: f32 = -4.5; 
+        let right: f32 = 3.5; 
+        let top: f32 = 5.4;
+        let bottom: f32 = -3.4; 
+        let near: f32 = -1.0; 
+        let far: f32 = -6.2;
+        let m_persp_proj = super::perspective_projection_matrix(left, right, top, bottom, near, far);
+        let m_persp = super::perspective_matrix(near, far);
+        let m_orth  = super::orthographic_matrix(left, right, top, bottom, near, far);
+
+        println!("m_persp_proj = {:?}", m_persp_proj);
+        println!("\n");
+        println!("m_orth * m_persp = {:?}", m_orth * m_persp);
+        println!("\n");
+        println!("m_orth * m_persp = {:?}", m_persp * m_orth);
+
+        assert!(m_persp_proj.approx_eq(&(m_persp * m_orth)));
+
+        let m_persp_t = m_persp.transpose();
+        let m_orth_t = m_orth.transpose();
+
+        assert!(m_persp_proj.transpose().approx_eq(&(m_orth_t * m_persp_t)));
+    }
+
+    #[test]
+    fn test_translation_matrix_should_be_same_as_vector_displacement() {
+        let trans    = Vector3::new(2.0, 2.0, 2.0);
+        let m_trans  = super::translation_matrix(&trans);
+        let point    = Point3::new(-4.5, 7.5, 80.0);
+        let point_h  = point.to_homogeneous();
+        let point2_h = m_trans.transpose() * point_h;
+        let point2   = (point + trans).to_homogeneous();
+
+        assert!(point2_h.approx_eq(&point2));
+    }
+
+    
+    #[test]
+    fn test_translation_matrix_should_respect_homogeneous_coordinates() {
+        let trans = Vector3::new(2.0, 2.0, 2.0);
+        let m_trans = super::translation_matrix(&trans);
+        let point = Point4::new(-4.5, 7.5, 8.0, 0.0);
+
+        println!("{}", m_trans.transpose() * point);
+
+        assert!(point.approx_eq(&(m_trans.transpose() * point)));
+    }
+
+    
+    #[test]
+    fn test_translation_matrix_with_no_displacement_should_be_identity() {
+        let trans = Vector3::new(0.0, 0.0, 0.0);
+        let m_trans = super::translation_matrix(&trans);
+        let point = Point4::new(-4.5, 7.5, 8.0, 1.0);
+
+        println!("{}", m_trans.transpose() * point);
+
+        assert!(point.approx_eq(&(m_trans.transpose() * point)));
     }
 }

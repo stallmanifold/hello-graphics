@@ -19,3 +19,8 @@ pub fn color_rgb(color: Vector3<f32>) -> Rgb {
 
     Rgb::from_channels(r, g, b)
 }
+
+#[cfg(test)]
+mod tests {
+    
+}

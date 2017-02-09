@@ -1,4 +1,5 @@
 extern crate nalgebra;
+
 extern crate image;
 extern crate num_traits;
 
