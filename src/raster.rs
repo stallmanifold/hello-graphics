@@ -288,14 +288,20 @@ pub type Rgb = [u8; 3];
 /// Use a floating point ZBuffer for right now.
 /// TODO: Convert to an integer Z-Buffer.
 pub struct ZBuffer<N> {
-    buf: Vec<N>,
+    buf: Vec<Vec<N>>,
 }
 
 impl<N> ZBuffer<N> where N: Copy + BaseFloat {
     pub fn new(width: usize, height: usize) -> ZBuffer<N> {
-        ZBuffer {
-            buf: Vec::with_capacity(height * width)
+        let mut z_buffer = ZBuffer {
+            buf: Vec::with_capacity(height)
+        };
+
+        for i in 0..z_buffer.buf.len() {
+            z_buffer.buf[i] = Vec::with_capacity(width);
         }
+
+        z_buffer
     }
 
     pub fn initialize(&mut self) {
@@ -304,19 +310,27 @@ impl<N> ZBuffer<N> where N: Copy + BaseFloat {
 }
 
 pub struct FrameBuffer {
-    buf: Vec<Rgb>,
+    buf: Vec<Vec<Rgb>>,
 }
 
 impl FrameBuffer {
     pub fn new(width: usize, height: usize) -> FrameBuffer {
-        FrameBuffer {
-            buf: Vec::with_capacity(height * width)
+        let mut frame_buffer = FrameBuffer {
+            buf: Vec::with_capacity(height)
+        };
+
+        for i in 0..frame_buffer.buf.len() {
+            frame_buffer.buf[i] = Vec::with_capacity(width);
         }
+
+        frame_buffer
     }
 
     pub fn initialize(&mut self) {
         for i in 0..self.buf.len() {
-            self.buf[i] = [0 as u8; 3];
+            for j in 0..self.buf[0].len() {
+                self.buf[i][j] = [0 as u8; 3];
+            }
         }
     }
 }
