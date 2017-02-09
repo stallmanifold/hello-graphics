@@ -1,2 +1,8 @@
 target
 Cargo.lock
+*.png
+*.tiff
+*.ppm
+*.jpg
+*.jpeg
+*.bmp
