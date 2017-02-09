@@ -80,6 +80,35 @@ pub fn perspective_matrix<N>(near: N, far: N) -> Matrix4<N>
                  m14, m24, m34, m44)
 }
 
+pub fn translation_matrix<N>(eye: &Vector3<N>) -> Matrix4<N>
+    where N: Copy + BaseFloat
+{
+    let zero = N::zero();
+    let one = N::one();
+
+    let m11 = one;
+    let m21 = zero;
+    let m31 = zero;
+    let m41 = zero;
+    let m12 = zero;
+    let m22 = one;
+    let m32 = zero;
+    let m42 = zero;
+    let m13 = zero;
+    let m23 = zero;
+    let m33 = one;
+    let m43 = zero;
+    let m14 = eye.x;
+    let m24 = eye.y;
+    let m34 = eye.z;
+    let m44 = one; 
+
+    Matrix4::new(m11, m21, m31, m41,
+                 m12, m22, m32, m42,
+                 m13, m23, m33, m43,
+                 m14, m24, m34, m44)
+}
+
 /// Convert from projected coordinates to the canonical view 
 /// volume [-1, 1] x [-1, 1] x [-1, 1].
 pub fn orthographic_matrix<N>(left: N, 
