@@ -289,12 +289,16 @@ pub type Rgb = [u8; 3];
 /// Use a floating point ZBuffer for right now.
 /// TODO: Convert to an integer Z-Buffer.
 pub struct ZBuffer<N> {
+    width: usize,
+    height: usize,
     buf: Vec<Vec<N>>,
 }
 
 impl<N> ZBuffer<N> where N: Copy + BaseFloat {
     pub fn new(width: usize, height: usize) -> ZBuffer<N> {
         let mut z_buffer = ZBuffer {
+            width: width,
+            height: height,
             buf: Vec::with_capacity(height)
         };
 
@@ -306,17 +310,35 @@ impl<N> ZBuffer<N> where N: Copy + BaseFloat {
     }
 
     pub fn initialize(&mut self) {
-        // TODO: Put an infinite value into each slot here.
+        let inf = N::infinity();
+
+        for i in 0..self.height {
+            for j in 0..self.width {
+                self.buf[i][j] = inf;
+            }
+        }
+    }
+
+    pub fn width(&self) -> usize {
+        self.width
+    }
+
+    pub fn height(&self) -> usize {
+        self.height
     }
 }
 
 pub struct FrameBuffer {
+    width: usize,
+    height: usize,
     buf: Vec<Vec<Rgb>>,
 }
 
 impl FrameBuffer {
     pub fn new(width: usize, height: usize) -> FrameBuffer {
         let mut frame_buffer = FrameBuffer {
+            width: width,
+            height: height,
             buf: Vec::with_capacity(height)
         };
 
@@ -333,6 +355,14 @@ impl FrameBuffer {
                 self.buf[i][j] = [0 as u8; 3];
             }
         }
+    }
+
+    pub fn width(&self) -> usize {
+        self.width
+    }
+
+    pub fn height(&self) -> usize {
+        self.height
     }
 }
 
