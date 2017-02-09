@@ -63,6 +63,9 @@ fn main() {
                 .expect("Something went wrong!");
 
     let path = Path::new("./triangle.png");
-    image::save_buffer(&path, buf.as_ref(), width as u32, height as u32, ColorType::RGB(8))
+    image::save_buffer(&path, buf.as_ref(), 
+                       width as u32, 
+                       height as u32, 
+                       ColorType::RGB(8))
           .expect("Something went wrong with saving the image!");
 }

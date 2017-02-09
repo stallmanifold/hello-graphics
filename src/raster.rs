@@ -513,6 +513,7 @@ mod tests {
     use nalgebra::{Vector3, 
                    Point3,
                    Point4,
+                   Matrix4,
                    ApproxEq, 
                    BaseFloat, 
                    Transpose,
@@ -597,7 +598,7 @@ mod tests {
     }
 
     #[test]
-    fn test_perspective_matrix_equation_should_satisfy() {
+    fn test_perspective_matrix_equation_should_be_the_product_of_orthographic_and_perspective() {
         let left: f32 = -4.5; 
         let right: f32 = 3.5; 
         let top: f32 = 5.4;
@@ -656,5 +657,14 @@ mod tests {
         println!("{}", m_trans.transpose() * point);
 
         assert!(point.approx_eq(&(m_trans.transpose() * point)));
+
+        let identity = Matrix4::new(1.0, 0.0, 0.0, 0.0,
+                                    0.0, 1.0, 0.0, 0.0,
+                                    0.0, 0.0, 1.0, 0.0,
+                                    0.0, 0.0, 0.0, 1.0);
+
+        assert!(identity.approx_eq(&(m_trans.transpose())));
     }
+
+    // TODO: World to Camera matrix should be a rigid body transformation.
 }
