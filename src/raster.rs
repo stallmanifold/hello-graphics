@@ -21,24 +21,7 @@ pub fn world_to_camera_matrix<N>(eye: Point3<N>, gaze: Vector3<N>, top: Vector3<
     let top_cross_w = top.cross(&w);
     let u = top_cross_w / top_cross_w.norm();
     let v = w.cross(&u);
-    /*
-    let m11 = u.x;
-    let m21 = v.x;
-    let m31 = w.x;
-    let m41 = zero;
-    let m12 = u.y;
-    let m22 = v.y;
-    let m32 = w.y;
-    let m42 = zero;
-    let m13 = u.z;
-    let m23 = v.z;
-    let m33 = w.z;
-    let m43 = zero;
-    let m14 = -eye.x;
-    let m24 = -eye.y;
-    let m34 = -eye.z;
-    let m44 = one;
-    */
+ 
     let m11 = u.x;
     let m21 = u.y;
     let m31 = u.z;
@@ -74,24 +57,7 @@ pub fn perspective_matrix<N>(near: N, far: N) -> Matrix4<N>
 
     let zero = N::zero();
     let one = N::one();
-    /*
-    let m11 = near;
-    let m21 = zero;
-    let m31 = zero;
-    let m41 = zero;
-    let m12 = zero;
-    let m22 = near;
-    let m32 = zero;
-    let m42 = zero;
-    let m13 = zero;
-    let m23 = zero;
-    let m33 = near + far;
-    let m43 = one;
-    let m14 = zero;
-    let m24 = zero;
-    let m34 = -far * near;
-    let m44 = zero; 
-    */
+
     let m11 = near;
     let m21 = zero;
     let m31 = zero;
@@ -121,24 +87,7 @@ pub fn translation_matrix<N>(eye: &Vector3<N>) -> Matrix4<N>
 {
     let zero = N::zero();
     let one = N::one();
-    /*
-    let m11 = one;
-    let m21 = zero;
-    let m31 = zero;
-    let m41 = zero;
-    let m12 = zero;
-    let m22 = one;
-    let m32 = zero;
-    let m42 = zero;
-    let m13 = zero;
-    let m23 = zero;
-    let m33 = one;
-    let m43 = zero;
-    let m14 = eye.x;
-    let m24 = eye.y;
-    let m34 = eye.z;
-    let m44 = one; 
-    */
+
     let m11 = one;
     let m21 = zero;
     let m31 = zero;
@@ -177,24 +126,7 @@ pub fn orthographic_matrix<N>(left: N,
     let zero = N::zero();
     let one  = N::one();
     let two  = one + one;
-    /*
-    let m11 = two / (right - left);
-    let m21 = zero;
-    let m31 = zero;
-    let m41 = zero;
-    let m12 = zero;
-    let m22 = two / (top - bottom);
-    let m32 = zero;
-    let m42 = zero;
-    let m13 = zero;
-    let m23 = zero;
-    let m33 = two / (near - far);
-    let m43 = zero;
-    let m14 = -((right + left) / (right - left));
-    let m24 = -((top + bottom) / (top - bottom));
-    let m34 = -((near + far) / (near - far));
-    let m44 = one; 
-    */
+
     let m11 = two / (right - left);
     let m21 = zero;
     let m31 = zero;
@@ -231,24 +163,7 @@ pub fn perspective_projection_matrix<N>(left: N,
     let zero = N::zero();
     let one = N::one();
     let two = one + one;
-    /*
-    let m11 = (two * near) / (right - left);
-    let m21 = zero;
-    let m31 = zero;
-    let m41 = zero;
-    let m12 = zero;
-    let m22 = (two * near) / (top - bottom);
-    let m32 = zero;
-    let m42 = zero;
-    let m13 = (left + right) / (left - right);
-    let m23 = (bottom + top) / (bottom - top);
-    let m33 = (far + near) / (near - far);
-    let m43 = one;
-    let m14 = zero;
-    let m24 = zero;
-    let m34 = (two * far * near) / (far - near);
-    let m44 = zero;
-    */
+
     let m11 = (two * near) / (right - left);
     let m21 = zero;
     let m31 = (left + right) / (left - right);
@@ -299,24 +214,7 @@ pub fn viewport_matrix<N>(num_x: usize, num_y: usize) -> Matrix4<N>
     for _ in 0..num_y {
         image_height += one;
     }
-    /*
-    let m11 = image_width / two;
-    let m21 = zero;
-    let m31 = zero;
-    let m41 = zero;
-    let m12 = zero;
-    let m22 = image_height / two;
-    let m32 = zero;
-    let m42 = zero;
-    let m13 = zero;
-    let m23 = zero;
-    let m33 = one;
-    let m43 = zero;
-    let m14 = (image_width - one) / two;
-    let m24 = (image_height - one) / two;
-    let m34 = zero;
-    let m44 = one;
-    */
+
     let m11 = image_width / two;
     let m21 = zero;
     let m31 = zero;
