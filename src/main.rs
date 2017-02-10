@@ -18,7 +18,7 @@ use color::Rgb;
 
 fn make_buffer(size: usize) -> Box<Vec<u8>> {
     let mut buf = Box::new(Vec::with_capacity(size));
-    for i in 0..buf.capacity() {
+    for _ in 0..buf.capacity() {
         buf.push(0x00);
     }
 

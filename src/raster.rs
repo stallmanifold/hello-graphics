@@ -1,6 +1,5 @@
 use nalgebra::{Vector3, Point3, Matrix4};
-use nalgebra::{Cross, Norm, BaseFloat, Transpose, Inverse};
-use num_traits::Float;
+use nalgebra::{Cross, Norm, BaseFloat, Inverse};
 use util;
 use std::ops;
 use color::Rgb;
@@ -558,12 +557,10 @@ mod tests {
                    Point4,
                    Matrix4,
                    ApproxEq, 
-                   BaseFloat,
-                   Inverse,
-                   Transpose,
-                   ToHomogeneous};
+                   ToHomogeneous,
+                   Cross,
+                   Norm};
     use color::Rgb;
-    use std::ops::Mul;
 
 
     #[test]
@@ -749,5 +746,33 @@ mod tests {
         // TODO: Benchmark this.
 
         assert!(m_wtoc.approx_eq(&(m_rot * m_trans)));
+    }
+
+    #[test]
+    fn test_world_to_camera_matrix() {
+        let p_xyz = Point4::new(10.0, 5.0, 9.0, 1.0);
+        let eye   = Vector3::new(45.0, 32.5, -19.0);
+        let gaze  = Vector3::new(-3.6, -4.0, 5.0);
+        let top   = Vector3::new(0.0, 0.0, 1.0);
+        let w     = -gaze / gaze.norm();
+        let t_cross_w = top.cross(&w);
+        let u = t_cross_w / t_cross_w.norm();
+        let v = w.cross(&u);
+
+        let m_rot = Matrix4::new(u.x, u.y, u.z, 0.0,
+                                 v.x, v.y, v.z, 0.0,
+                                 w.x, w.y, w.z, 0.0,
+                                 0.0, 0.0, 0.0, 1.0);
+
+        let m_trans = Matrix4::new(1.0, 0.0, 0.0, -eye.x,
+                                   0.0, 1.0, 0.0, -eye.y,
+                                   0.0, 0.0, 1.0, -eye.z,
+                                   0.0, 0.0, 0.0,    1.0);
+
+        let m = m_rot * m_trans;
+        let m_wtoc = super::world_to_camera_matrix(eye, gaze, top);
+
+        assert!(m_wtoc.approx_eq(&m));
+        assert!((m_wtoc * p_xyz).approx_eq(&(m * p_xyz)));
     }
 }
