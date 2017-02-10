@@ -1,5 +1,5 @@
 use nalgebra::{Vector3, Point3, Matrix4};
-use nalgebra::{Cross, Norm, BaseFloat};
+use nalgebra::{Cross, Norm, BaseFloat, Transpose, Inverse};
 use num_traits::Float;
 use util;
 use std::ops;
@@ -7,8 +7,8 @@ use color::Rgb;
 
 /// TODO: Check divisions for zeros in matrix code.
 
-/// Generate the camera transformation from the given data.
-pub fn world_to_camera_matrix<N>(eye: Point3<N>, gaze: Vector3<N>, top: Vector3<N>) -> Matrix4<N>
+/// Generate the world transformation from the given camera data.
+pub fn camera_to_world_matrix<N>(eye: Vector3<N>, gaze: Vector3<N>, top: Vector3<N>) -> Matrix4<N>
     where N: BaseFloat
 {
     // The vectors are all cast into homogeneous coordinates here. Points are affected
@@ -23,17 +23,17 @@ pub fn world_to_camera_matrix<N>(eye: Point3<N>, gaze: Vector3<N>, top: Vector3<
     let v = w.cross(&u);
  
     let m11 = u.x;
-    let m21 = u.y;
-    let m31 = u.z;
-    let m41 = -eye.x;
-    let m12 = v.x;
+    let m21 = v.x;
+    let m31 = w.x;
+    let m41 = eye.x;
+    let m12 = u.y;
     let m22 = v.y;
-    let m32 = v.z;
-    let m42 = -eye.y;
-    let m13 = w.x;
-    let m23 = w.y;
+    let m32 = w.y;
+    let m42 = eye.y;
+    let m13 = u.z;
+    let m23 = v.z;
     let m33 = w.z;
-    let m43 = -eye.z;
+    let m43 = eye.z;
     let m14 = zero;
     let m24 = zero;
     let m34 = zero;
@@ -46,6 +46,12 @@ pub fn world_to_camera_matrix<N>(eye: Point3<N>, gaze: Vector3<N>, top: Vector3<
                  m12, m22, m32, m42,
                  m13, m23, m33, m43,
                  m14, m24, m34, m44)
+}
+
+pub fn world_to_camera_matrix<N>(eye: Vector3<N>, gaze: Vector3<N>, top: Vector3<N>) -> Matrix4<N>
+    where N: BaseFloat
+{
+    camera_to_world_matrix(eye, gaze, top).inverse().unwrap()
 }
 
 /// Generate the perspective matrix from creating perspective projection
@@ -82,7 +88,7 @@ pub fn perspective_matrix<N>(near: N, far: N) -> Matrix4<N>
 }
 
 /// Constructs a translation matrix from a three-dimensional vector. 
-pub fn translation_matrix<N>(eye: &Vector3<N>) -> Matrix4<N>
+pub fn translation_matrix<N>(eye: Vector3<N>) -> Matrix4<N>
     where N: BaseFloat
 {
     let zero = N::zero();
@@ -104,6 +110,42 @@ pub fn translation_matrix<N>(eye: &Vector3<N>) -> Matrix4<N>
     let m24 = zero;
     let m34 = zero;
     let m44 = one; 
+
+    Matrix4::new(m11, m21, m31, m41,
+                 m12, m22, m32, m42,
+                 m13, m23, m33, m43,
+                 m14, m24, m34, m44)
+}
+
+/// Constructs a rotation matrix from a set of coordinate axes.
+pub fn rotation_matrix<N>(gaze: Vector3<N>, top: Vector3<N>) -> Matrix4<N>
+    where N: BaseFloat
+{
+    let zero = N::zero();
+    let one  = N::one();
+
+    // Compute the orientation of the world space axes in the rotated space.
+    let w = -gaze / gaze.norm();
+    let t_cross_w = top.cross(&w);
+    let u = t_cross_w / t_cross_w.norm();
+    let v = w.cross(&u);
+
+    let m11 = u.x;
+    let m21 = u.y;
+    let m31 = u.z;
+    let m41 = zero;
+    let m12 = v.x;
+    let m22 = v.y;
+    let m32 = v.z;
+    let m42 = zero;
+    let m13 = w.x;
+    let m23 = w.y;
+    let m33 = w.z;
+    let m43 = zero;
+    let m14 = zero;
+    let m24 = zero;
+    let m34 = zero;
+    let m44 = one;
 
     Matrix4::new(m11, m21, m31, m41,
                  m12, m22, m32, m42,
@@ -516,7 +558,8 @@ mod tests {
                    Point4,
                    Matrix4,
                    ApproxEq, 
-                   BaseFloat, 
+                   BaseFloat,
+                   Inverse,
                    Transpose,
                    ToHomogeneous};
     use color::Rgb;
@@ -622,7 +665,7 @@ mod tests {
     #[test]
     fn test_translation_matrix_should_be_same_as_vector_displacement() {
         let trans    = Vector3::new(2.0, 2.0, 2.0);
-        let m_trans  = super::translation_matrix(&trans);
+        let m_trans  = super::translation_matrix(trans);
         let point    = Point3::new(-4.5, 7.5, 80.0);
         let point_h  = point.to_homogeneous();
         let point2_h = m_trans * point_h;
@@ -634,7 +677,7 @@ mod tests {
     #[test]
     fn test_translation_matrix_should_respect_homogeneous_coordinates() {
         let trans = Vector3::new(2.0, 2.0, 2.0);
-        let m_trans = super::translation_matrix(&trans);
+        let m_trans = super::translation_matrix(trans);
         let point = Point4::new(-4.5, 7.5, 8.0, 0.0);
 
         println!("{}", m_trans * point);
@@ -645,7 +688,7 @@ mod tests {
     #[test]
     fn test_translation_matrix_with_no_displacement_should_be_identity() {
         let trans = Vector3::new(0.0, 0.0, 0.0);
-        let m_trans = super::translation_matrix(&trans);
+        let m_trans = super::translation_matrix(trans);
         let point = Point4::new(-4.5, 7.5, 8.0, 1.0);
 
         println!("{}", m_trans * point);
@@ -684,5 +727,27 @@ mod tests {
 
         assert!(world_to_raster.approx_eq(&(vp * ppm)));
     }
-    // TODO: World to Camera matrix should be a rigid body transformation.
+    
+    #[test]
+    fn test_world_to_camera_matrix_should_be_a_rigid_body_transformation() {
+        // A world to camera transformation should be the product of a displacement of the
+        // world space origin to the camera followed by a rotation.
+        let eye  = Vector3::new(45.0, 32.5, -19.0);
+        let gaze = Vector3::new(-3.6, -4.0, 5.0);
+        let top  = Vector3::new(0.0, 0.0, 1.0); 
+
+        let m_trans = super::translation_matrix(-eye);
+        let m_rot   = super::rotation_matrix(gaze, top);
+        let m_wtoc  = super::world_to_camera_matrix(eye, gaze, top);
+
+        println!("{}\n", m_trans);
+        println!("{}\n", m_rot);
+        println!("{}\n", (m_rot * m_trans));
+        println!("Result from world to camera:");
+        println!("{}\n", m_wtoc);        
+
+        // TODO: Benchmark this.
+
+        assert!(m_wtoc.approx_eq(&(m_rot * m_trans)));
+    }
 }
