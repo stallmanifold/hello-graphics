@@ -4,6 +4,7 @@ extern crate image;
 extern crate num_traits;
 
 mod raster;
+mod z_buffer;
 mod frame_buffer;
 mod util;
 mod shade;
