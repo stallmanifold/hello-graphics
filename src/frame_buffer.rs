@@ -118,8 +118,8 @@ mod tests {
 
     #[test]
     fn test_frame_buffer_should_correctly_report_dimensions() {
-        let width  = 512;
-        let height = 512;
+        let width  = 128;
+        let height = 128;
         let buf = super::frame_buffer(width, height);
 
         assert_eq!(buf.width(), width);
@@ -141,6 +141,30 @@ mod tests {
             for pixel in line {
                 assert_eq!(pixel, &zero);
             }
+        }
+    }
+
+    #[test]
+    fn test_dump_frame() {
+        let width  = 128;
+        let height = 128;
+        let mut buf  = super::frame_buffer(width, height);
+        let red = Rgb::from_channels(255,0,0);
+        
+        for i in 0..buf.height() {
+            for j in 0..buf.width() {
+                buf[i][j] = red;
+            }
+        }
+
+        let mut dump_buf = Vec::with_capacity(3 * width * height);
+
+        buf.dump_frame(&mut dump_buf);
+
+        for chunk in dump_buf.chunks(3) {
+            let rgb = Rgb::from_channels(chunk[0], chunk[1], chunk[2]);
+
+            assert_eq!(red, rgb);
         }
     }
 }

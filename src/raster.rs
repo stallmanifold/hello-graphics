@@ -4,6 +4,7 @@ use util;
 
 
 /// TODO: Check divisions for zeros in matrix code.
+/// TODO: Convert all raster functions to homogeneous 4D coordinates.
 
 /// Generate the world transformation from the given camera data.
 pub fn camera_to_world_matrix<N>(eye: Vector3<N>, gaze: Vector3<N>, top: Vector3<N>) -> Matrix4<N>
@@ -236,8 +237,9 @@ pub fn perspective_projection_matrix<N>(left: N,
 /// of pixels going in the x-direction, and n_y is the number of pixels going in the 
 /// y-direction, i.e. (n_x, n_y) is the resolution of the screen. A pixel is one unit
 /// wide in this coordinate system.
+use std::fmt;
 pub fn viewport_matrix<N>(num_x: usize, num_y: usize) -> Matrix4<N>
-    where N: BaseFloat
+    where N: BaseFloat + fmt::Debug
 {
     let zero = N::zero();
     let one  = N::one();
@@ -287,7 +289,7 @@ pub fn world_to_raster_matrix<N>(left: N,
                                  far: N, 
                                  image_width: usize, 
                                  image_height: usize) -> Matrix4<N> 
-    where N: BaseFloat
+    where N: BaseFloat + fmt::Debug
 {
     let pp_matrix: Matrix4<N> = perspective_projection_matrix(left, right, top, bottom, near, far);
     let vp_matrix: Matrix4<N> = viewport_matrix(image_width, image_height);
