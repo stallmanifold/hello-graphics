@@ -12,7 +12,7 @@ mod color;
 
 use nalgebra::{Matrix4, Vector4, Vector3, Point3, Point4, Transpose, ToHomogeneous};
 use std::path::Path;
-use raster::ZBuffer;
+use z_buffer::ZBuffer;
 use image::ColorType;
 use color::Rgb;
 
@@ -41,7 +41,7 @@ fn main() {
     // Project triangle into screen.
     // TODO: convert to raster coordinates.
 
-    let mut z_buffer: Box<ZBuffer<f32>> = raster::z_buffer(width, height);
+    let mut z_buffer: Box<ZBuffer<f32>> = z_buffer::z_buffer(width, height);
     let mut frame_buffer = frame_buffer::frame_buffer(width, height);
 
     let area: f32 = raster::compute_area(&v0, &v1, &v2);
