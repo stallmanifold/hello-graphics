@@ -194,7 +194,8 @@ pub fn perspective_projection_matrix<N>(left: N,
 /// an orthographic (length preserving) transformation. This casts vertices into the
 /// coordinate system [-0.5, n_x - 0.5] x [-0.5, n_y - 0.5], where n_x is the number 
 /// of pixels going in the x-direction, and n_y is the number of pixels going in the 
-/// y-direction, i.e. (n_x, n_y) is the resolution of the screen.
+/// y-direction, i.e. (n_x, n_y) is the resolution of the screen. A pixel is one unit
+/// wide in this coordinate system.
 pub fn viewport_matrix<N>(num_x: usize, num_y: usize) -> Matrix4<N>
     where N: BaseFloat
 {
@@ -599,12 +600,12 @@ mod tests {
 
     #[test]
     fn test_perspective_matrix_equation_should_be_the_product_of_orthographic_and_perspective() {
-        let left: f32 = -4.5; 
-        let right: f32 = 3.5; 
-        let top: f32 = 5.4;
+        let left: f32   = -4.5; 
+        let right: f32  =  3.5; 
+        let top: f32    =  5.4;
         let bottom: f32 = -3.4; 
-        let near: f32 = -1.0; 
-        let far: f32 = -6.2;
+        let near: f32   = -1.0; 
+        let far: f32    = -6.2;
         let m_persp_proj = super::perspective_projection_matrix(left, right, top, bottom, near, far);
         let m_persp = super::perspective_matrix(near, far);
         let m_orth  = super::orthographic_matrix(left, right, top, bottom, near, far);
@@ -635,7 +636,6 @@ mod tests {
         assert!(point2_h.approx_eq(&point2));
     }
 
-    
     #[test]
     fn test_translation_matrix_should_respect_homogeneous_coordinates() {
         let trans = Vector3::new(2.0, 2.0, 2.0);
@@ -647,7 +647,6 @@ mod tests {
         assert!(point.approx_eq(&(m_trans.transpose() * point)));
     }
 
-    
     #[test]
     fn test_translation_matrix_with_no_displacement_should_be_identity() {
         let trans = Vector3::new(0.0, 0.0, 0.0);
@@ -666,5 +665,29 @@ mod tests {
         assert!(identity.approx_eq(&(m_trans.transpose())));
     }
 
+    #[test]
+    fn test_world_to_raster_matrix_should_equal_viewport_times_perspective_projection() {
+        let left: f32     = -4.5; 
+        let right: f32    =  3.5; 
+        let top: f32      =  5.4;
+        let bottom: f32   = -3.4; 
+        let near: f32     = -1.0; 
+        let far: f32      = -6.2;
+        let width: usize  = 1920;
+        let height: usize = 1080;
+
+        let world_to_raster = super::world_to_raster_matrix(left, 
+                                                            right, 
+                                                            top, 
+                                                            bottom, 
+                                                            near, 
+                                                            far, 
+                                                            width, 
+                                                            height);
+        let vp = super::viewport_matrix::<f32>(width, height);
+        let ppm = super::perspective_projection_matrix(left, right, top, bottom, near, far);
+
+        assert!(world_to_raster.approx_eq(&(vp * ppm)));
+    }
     // TODO: World to Camera matrix should be a rigid body transformation.
 }
