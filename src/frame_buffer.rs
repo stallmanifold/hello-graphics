@@ -63,7 +63,7 @@ impl FrameBuffer {
         }
     }
 
-    fn scanlines(&self) -> ScanlineIter {
+    pub fn scanlines(&self) -> ScanlineIter {
         ScanlineIter {
             index: 0,
             lines: &self.buf
@@ -71,7 +71,7 @@ impl FrameBuffer {
     }
 }
 
-struct ScanlineIter<'a> {
+pub struct ScanlineIter<'a> {
     index: usize,
     lines: &'a [Vec<Rgb>],
 }

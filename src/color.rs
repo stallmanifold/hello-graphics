@@ -33,8 +33,13 @@ impl Rgb {
 
     /// Returns the number of RGB channels. Each one is a byte in size.
     #[inline(always)]
-    pub fn channel_width() -> usize {
+    pub fn channel_count() -> usize {
         3
+    }
+
+    /// Returns a slice of subpixels, one for each RGB channel.
+    pub fn channels(&self) -> &[u8] {
+        &self.data
     }
 }
 

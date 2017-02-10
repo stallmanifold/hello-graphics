@@ -17,6 +17,8 @@ use z_buffer::ZBuffer;
 use image::ColorType;
 use color::Rgb;
 use std::ops::Mul;
+use std::fs::File;
+use std::io::Write;
 
 // TODO: Add perspective correction to gouraud model.
 
@@ -48,14 +50,14 @@ fn main() {
     // Top is defined to be the positive y axis.
     let top: Vector3<f32> = Vector3::new(0.0, 1.0, 0.0);
 
-    let width: usize = 512;
-    let height: usize = 512;
+    let width: usize = 128;
+    let height: usize = 128;
     // perspective matrix parameters.
     let l = -40.0; 
     let r = 40.0;
     let t = 40.0;
     let b = -40.0;
-    let n = -10.0;
+    let n = -5.0;
     let f = -20.0;
 
     let m_cam = raster::world_to_camera_matrix::<f32>(eye, gaze, top);
@@ -81,25 +83,49 @@ fn main() {
             let pixel = Point3::new((i as f32) + 0.5, (j as f32) + 0.5, 0.0);
             let mut w = raster::barycentric_coords(&v0, &v1, &v2, &pixel);
             if (w[0] >= 0.0) && (w[1] >= 0.0) && (w[2] >= 0.0) {
-                //w /= area;
-                //let color = shade::gouraud(c0, c1, c2, w);
-                //let rgb = shade::color_rgb(color);
-                frame_buffer[i][j] = Rgb::from_channels(0xFF, 0x00, 0x00);//rgb;
-            } else {
-                frame_buffer[i][j] = Rgb::from_channels(0x00, 0x00, 0x00);
+                w /= area;
+                let color = shade::gouraud(c0, c1, c2, w);
+                let rgb = shade::color_rgb(color);
+                frame_buffer[i][j] = rgb;
             }
         }
     }
 
-    let mut buf = make_buffer(Rgb::channel_width() * height * width);
-
+    let mut buf = make_buffer(Rgb::channel_count() * height * width);
+    /*
     frame_buffer.dump_frame(&mut *buf)
                 .expect("Something went wrong!");
-
+    */
+    /*
+    for line in frame_buffer.scanlines() {
+        for pixel in line.iter() {
+            if pixel[0] == 0xFF {
+                print!("{:X}", 1);
+            } else {
+                print!("{:X}", 0);
+            }
+        }
+        println!();
+    }
+    */
+    /*
     let path = Path::new("./triangle.png");
+    
     image::save_buffer(&path, buf.as_ref(), 
-                       width as u32, 
-                       height as u32, 
+                       (width) as u32, 
+                       (height) as u32, 
                        ColorType::RGB(8))
           .expect("Something went wrong with saving the image!");
+    */
+    //let path = Path::new("triangle.ppm");
+    let mut f: File = File::create("triangle.ppm").expect("Could not create file.");
+    f.write(b"P3\n").expect("Could not write to file.");
+    write!(f, "{} {}\n{}\n", width as u32, height as u32, 0xFF).expect("Could not write to file.");
+    for line in frame_buffer.scanlines() {
+        for pixel in line {
+            let channels = pixel.channels();
+            write!(f, "{} {} {} ", channels[0], channels[1], channels[2]);
+        }
+        writeln!(f, "\n");
+    }
 }
