@@ -343,9 +343,9 @@ pub fn barycentric_coords<N>(v0: &Point3<N>,
                               p: &Point3<N>) -> Point3<N>
     where N: BaseFloat
 {
-    let w0 = compute_edge(v0, v1, p);
-    let w1 = compute_edge(v1, v2, p);
-    let w2 = compute_edge(v2, v0, p);
+    let w0 = compute_edge(v1, v2, p);
+    let w1 = compute_edge(v2, v0, p);
+    let w2 = compute_edge(v0, v1, p);
 
     Point3::new(w0, w1, w2)
 }
