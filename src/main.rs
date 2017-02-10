@@ -4,6 +4,7 @@ extern crate image;
 extern crate num_traits;
 
 mod raster;
+mod frame_buffer;
 mod util;
 mod shade;
 mod color;
@@ -40,7 +41,7 @@ fn main() {
     // TODO: convert to raster coordinates.
 
     let mut z_buffer: Box<ZBuffer<f32>> = raster::z_buffer(width, height);
-    let mut frame_buffer = raster::frame_buffer(width, height);
+    let mut frame_buffer = frame_buffer::frame_buffer(width, height);
 
     let area: f32 = raster::compute_area(&v0, &v1, &v2);
 
