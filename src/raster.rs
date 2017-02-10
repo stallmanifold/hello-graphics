@@ -326,6 +326,7 @@ pub fn bounding_box<N>(p1: &Point3<N>,
 /// Compute on which side of a triangle edge a point is on. They are defined such that
 /// They are iterated in clockwise order. This way a point is positive if it lies
 /// entirely within the triangle.
+#[inline]
 pub fn compute_edge<N>(v1: &Point3<N>, 
                        v2: &Point3<N>,
                         p: &Point3<N>) -> N
@@ -349,6 +350,7 @@ pub fn barycentric_coords<N>(v0: &Point3<N>,
     Point3::new(w0, w1, w2)
 }
 
+/// Computes the area of a triangle primitive.
 pub fn compute_area<N>(v0: &Point3<N>,
                        v1: &Point3<N>,
                        v2: &Point3<N>,) -> N
@@ -522,5 +524,23 @@ mod tests {
 
         assert!(m_wtoc.approx_eq(&m));
         assert!((m_wtoc * p_xyz).approx_eq(&(m * p_xyz)));
+    }
+
+    #[test]
+    fn test_triangle_area_function_should_return_same_area() {
+        let v0: Point3<f32> = Point3::new(13.0, 34.0, 114.0);
+        let v1: Point3<f32> = Point3::new(29.0, -15.0, 44.0);
+        let v2: Point3<f32> = Point3::new(-48.0, -10.0, 82.0);
+
+        let area0: f32 = super::compute_area(&v0, &v1, &v2);
+        let area1: f32 = super::compute_area(&v1, &v2, &v0);
+        let area2: f32 = super::compute_area(&v2, &v0, &v1);
+        let area3: f32 = super::compute_area(&v2, &v1, &v0);
+        let area4: f32 = super::compute_area(&v0, &v2, &v1);
+
+        assert_eq!(area0.abs(), area1.abs());
+        assert_eq!(area1.abs(), area2.abs());
+        assert_eq!(area2.abs(), area3.abs());
+        assert_eq!(area3.abs(), area4.abs());
     }
 }
