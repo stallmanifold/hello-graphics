@@ -5,6 +5,7 @@ use util;
 
 /// TODO: Check divisions for zeros in matrix code.
 /// TODO: Convert all raster functions to homogeneous 4D coordinates.
+/// TODO: Make interface to raster functions consistent (with pointers to data types instead of copying them.)
 
 /// Generate the world transformation from the given camera data.
 pub fn camera_to_world_matrix<N>(eye: Vector3<N>, gaze: Vector3<N>, top: Vector3<N>) -> Matrix4<N>

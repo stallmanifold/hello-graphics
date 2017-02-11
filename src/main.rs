@@ -9,6 +9,7 @@ mod frame_buffer;
 mod util;
 mod shade;
 mod color;
+mod ppm;
 
 use nalgebra::{Matrix4, Vector4, Vector3, Point3, Point4, 
                FromHomogeneous, Transpose, ToHomogeneous};
@@ -50,8 +51,8 @@ fn main() {
     // Top is defined to be the positive y axis.
     let top: Vector3<f32> = Vector3::new(0.0, 1.0, 0.0);
 
-    let width: usize = 128;
-    let height: usize = 128;
+    let width: usize = 512;
+    let height: usize = 512;
     // perspective matrix parameters.
     let l = -40.0; 
     let r = 40.0;
@@ -108,16 +109,6 @@ fn main() {
         println!();
     }
     */
-    /*
-    let path = Path::new("./triangle.png");
-    
-    image::save_buffer(&path, buf.as_ref(), 
-                       (width) as u32, 
-                       (height) as u32, 
-                       ColorType::RGB(8))
-          .expect("Something went wrong with saving the image!");
-    */
-    //let path = Path::new("triangle.ppm");
     let mut f: File = File::create("triangle.ppm").expect("Could not create file.");
     f.write(b"P3\n").expect("Could not write to file.");
     write!(f, "{} {}\n{}\n", width as u32, height as u32, 0xFF).expect("Could not write to file.");
