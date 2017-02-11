@@ -1,3 +1,4 @@
+#![allow(dead_code)]
 use nalgebra::{Vector3, Point3, Matrix4};
 use nalgebra::{Cross, Norm, BaseFloat, Inverse};
 use util;

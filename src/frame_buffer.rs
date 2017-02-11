@@ -149,11 +149,11 @@ mod tests {
         let width  = 128;
         let height = 128;
         let mut buf  = super::frame_buffer(width, height);
-        let red = Rgb::from_channels(255,0,0);
+        let color = Rgb::from_channels(80,90,100);
         
         for i in 0..buf.height() {
             for j in 0..buf.width() {
-                buf[i][j] = red;
+                buf[i][j] = color;
             }
         }
 
@@ -164,7 +164,7 @@ mod tests {
         for chunk in dump_buf.chunks(3) {
             let rgb = Rgb::from_channels(chunk[0], chunk[1], chunk[2]);
 
-            assert_eq!(red, rgb);
+            assert_eq!(rgb, color);
         }
     }
 }

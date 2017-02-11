@@ -1,6 +1,4 @@
 extern crate nalgebra;
-
-extern crate image;
 extern crate num_traits;
 
 mod raster;
@@ -11,15 +9,10 @@ mod shade;
 mod color;
 mod ppm;
 
-use nalgebra::{Matrix4, Vector4, Vector3, Point3, Point4, 
-               FromHomogeneous, Transpose, ToHomogeneous};
-use std::path::Path;
+use nalgebra::{Vector3, Point3, FromHomogeneous, ToHomogeneous};
 use z_buffer::ZBuffer;
-use image::ColorType;
 use color::Rgb;
-use std::ops::Mul;
 use std::fs::File;
-use std::io::Write;
 use ppm::NetPBMEncoder;
 
 // TODO: Add perspective correction to gouraud model.
@@ -77,7 +70,7 @@ fn main() {
 
     let area: f32 = raster::compute_area(&v0, &v1, &v2);
 
-    //let mut z_buffer: Box<ZBuffer<f32>> = z_buffer::z_buffer(width, height);
+    let mut z_buffer: Box<ZBuffer<f32>> = z_buffer::z_buffer(width, height);
     let mut frame_buffer = frame_buffer::frame_buffer(width, height);
 
     for i in 0..height {
@@ -112,5 +105,5 @@ fn main() {
     */
     let mut f: File = File::create("triangle.ppm").expect("Could not create file.");
     let mut ppm = NetPBMEncoder::new(ppm::NetPBM::PixMapAscii, &mut f);
-    ppm.encode(&buf, width as u32, height as u32);
+    let _ = ppm.encode(&buf, width as u32, height as u32);
 }
