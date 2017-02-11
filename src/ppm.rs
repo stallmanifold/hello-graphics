@@ -121,6 +121,7 @@ impl<'a, W> NetPBMEncoder<'a, W> where W: 'a + io::Write {
                         } else {
                             let _ = try!(self.writer.write_all(&[1]));
                         }
+                        let _ = try!(self.writer.write_all(" ".as_bytes()));
                     }
                     let _ = try!(self.writer.write_all("\n".as_bytes()));
                 }
