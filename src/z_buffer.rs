@@ -1,4 +1,5 @@
 use nalgebra::BaseFloat;
+use std::ops;
 
 
 /// Return an initialized heap-allocated z-buffer.
@@ -81,6 +82,28 @@ impl<'a, N: 'a> Iterator for ZBufferLineIter<'a, N> {
         } else {
             None
         }
+    }
+}
+
+impl<N> ops::Index<usize> for ZBuffer<N> where N: BaseFloat {
+    type Output = Vec<N>;
+
+    fn index(&self, index: usize) -> &Self::Output {
+        &self.buf[index]
+    } 
+}
+
+impl<'a, N> ops::Index<usize> for &'a ZBuffer<N> where N: BaseFloat {
+    type Output = Vec<N>;
+
+    fn index(&self, index: usize) -> &Self::Output {
+        &self.buf[index]
+    } 
+}
+
+impl<N> ops::IndexMut<usize> for ZBuffer<N> where N: BaseFloat {
+    fn index_mut(&mut self, index: usize) -> &mut Self::Output {
+        &mut self.buf[index]
     }
 }
 

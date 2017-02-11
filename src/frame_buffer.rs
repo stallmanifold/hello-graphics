@@ -10,6 +10,7 @@ pub fn frame_buffer(width: usize, height: usize) -> Box<FrameBuffer> {
     frame_buffer
 }
 
+#[derive(PartialEq, Eq, Debug)]
 pub struct FrameBuffer {
     width: usize,
     height: usize,

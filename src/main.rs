@@ -1,3 +1,4 @@
+#![crate_name="graphics"]
 extern crate nalgebra;
 extern crate num_traits;
 
@@ -70,9 +71,11 @@ fn main() {
 
     let area: f32 = raster::compute_area(&v0, &v1, &v2);
 
+    // Initialize the z buffer and frame buffer.
     let mut z_buffer: Box<ZBuffer<f32>> = z_buffer::z_buffer(width, height);
     let mut frame_buffer = frame_buffer::frame_buffer(width, height);
 
+    // Render the current scene.
     for i in 0..height {
         for j in 0..width {
             let pixel = Point3::new((i as f32) + 0.5, (j as f32) + 0.5, 0.0);
