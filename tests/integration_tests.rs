@@ -104,4 +104,7 @@ fn test_z_buffer_should_not_affect_rendering_with_one_primitive() {
     // Since we are only rendering one triangle primitive, the frame buffers should
     // agree with each other.
     assert_eq!(frame_buffer_z, frame_buffer_no_z);
+    // The Z-buffering code actually wrote something in.
+    let zero = frame_buffer::frame_buffer(width, height);
+    assert_ne!(frame_buffer_z, zero);
 }
