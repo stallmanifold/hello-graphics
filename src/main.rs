@@ -20,6 +20,7 @@ use color::Rgb;
 use std::ops::Mul;
 use std::fs::File;
 use std::io::Write;
+use ppm::NetPBMEncoder;
 
 // TODO: Add perspective correction to gouraud model.
 
@@ -93,30 +94,23 @@ fn main() {
     }
 
     let mut buf = make_buffer(Rgb::channel_count() * height * width);
-    /*
+    
     frame_buffer.dump_frame(&mut *buf)
-                .expect("Something went wrong!");
-    */
+                .expect("Could not write into buffer!");
+    
     /*
     for line in frame_buffer.scanlines() {
         for pixel in line.iter() {
-            if pixel[0] == 0xFF {
-                print!("{:X}", 1);
-            } else {
+            if pixel[0] == 0 {
                 print!("{:X}", 0);
+            } else {
+                print!("{:X}", 1);
             }
         }
         println!();
     }
     */
     let mut f: File = File::create("triangle.ppm").expect("Could not create file.");
-    f.write(b"P3\n").expect("Could not write to file.");
-    write!(f, "{} {}\n{}\n", width as u32, height as u32, 0xFF).expect("Could not write to file.");
-    for line in frame_buffer.scanlines() {
-        for pixel in line {
-            let channels = pixel.channels();
-            write!(f, "{} {} {} ", channels[0], channels[1], channels[2]);
-        }
-        writeln!(f, "\n");
-    }
+    let mut ppm = NetPBMEncoder::new(ppm::NetPBM::PixMapAscii, &mut f);
+    ppm.encode(&buf, width as u32, height as u32);
 }

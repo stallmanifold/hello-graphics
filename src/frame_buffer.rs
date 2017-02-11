@@ -51,9 +51,9 @@ impl FrameBuffer {
         if other_buf.len() >= 3 * self.height * self.width {
             for i in 0..self.height {
                 for j in 0..self.width {
-                    other_buf[self.width * i + j]   = self.buf[i][j][0]; 
-                    other_buf[self.width * i + j+1] = self.buf[i][j][1];
-                    other_buf[self.width * i + j+2] = self.buf[i][j][2];
+                    other_buf[3*(self.width * i + j)]   = self.buf[i][j][0]; 
+                    other_buf[3*(self.width * i + j)+1] = self.buf[i][j][1];
+                    other_buf[3*(self.width * i + j)+2] = self.buf[i][j][2];
                 }
             }
 

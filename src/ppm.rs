@@ -117,35 +117,28 @@ impl<'a, W> NetPBMEncoder<'a, W> where W: 'a + io::Write {
                 for line in image.chunks(width as usize) {
                     for pixel in line {
                         if *pixel == 0 {
-                            let _ = try!(self.writer.write_all(&[0]));
+                            let _ = try!(write!(self.writer, "0 "));
                         } else {
-                            let _ = try!(self.writer.write_all(&[1]));
+                            let _ = try!(write!(self.writer, "1 "));
                         }
-                        let _ = try!(self.writer.write_all(" ".as_bytes()));
                     }
-                    let _ = try!(self.writer.write_all("\n".as_bytes()));
+                    let _ = try!(write!(self.writer, "\n"));
                 }
             }
             ColorType::Gray => {
                 for i in 0..height as usize {
                     for j in 0..width as usize {
-                        let _ = try!(self.writer.write_all(&[image[(width as usize) * i + j]]));
-                        let _ = try!(self.writer.write_all(" ".as_bytes()));
+                        let _ = try!(write!(self.writer, "{} ", image[(width as usize) * i + j]));
                     }
                     let _ = try!(self.writer.write_all("\n".as_bytes()));
                 }
             }
             ColorType::Rgb => {
-                for line in image.chunks(width as usize) {
-                    for rgb in line.chunks(3) {
-                        let _ = try!(self.writer.write_all(&[rgb[0]]));
-                        let _ = try!(self.writer.write_all(" ".as_bytes()));
-                        let _ = try!(self.writer.write_all(&[rgb[1]]));
-                        let _ = try!(self.writer.write_all(" ".as_bytes()));
-                        let _ = try!(self.writer.write_all(&[rgb[2]]));
-                        let _ = try!(self.writer.write_all(" ".as_bytes()));
+                for line in image.chunks(3 * width as usize) {
+                    for pixel in line.chunks(3) {
+                        let _ = try!(write!(self.writer, "{} {} {} ", pixel[0], pixel[1], pixel[2]));
                     }
-                    let _ = try!(self.writer.write_all("\n".as_bytes()));
+                    let _ = write!(self.writer, "\n");
                 }
             }
         }
