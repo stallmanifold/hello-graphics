@@ -46,7 +46,7 @@ fn main() {
     let top: Vector3<f32> = Vector3::new(0.0, 1.0, 0.0);
 
     let width: usize = 512;
-    let height: usize = 512;
+    let height: usize =     512;
     // perspective matrix parameters.
     let l = -40.0; 
     let r = 40.0;
