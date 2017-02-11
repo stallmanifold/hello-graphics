@@ -77,10 +77,8 @@ fn test_z_buffer_should_not_affect_rendering_with_one_primitive() {
                 // Do the z-buffer test.
                 let one_over_z: f32 = w[0] * v0_rast.z + w[1] * v1_rast.z + w[2] * v2_rast.z;
                 let z: f32 = 1.0 / one_over_z;
-
                 if z < (*z_buffer)[i][j] {
                     (*z_buffer)[i][j] = z;
-
                     // Write a sentinel value into the frame buffer.
                     frame_buffer_z[i][j] = Rgb::from_channels(0xFF, 0xFF, 0xFF);
                 }
