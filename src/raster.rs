@@ -8,7 +8,9 @@ use util;
 /// TODO: Convert all raster functions to homogeneous 4D coordinates.
 /// TODO: Make interface to raster functions consistent (with pointers to data types instead of copying them.)
 
+///
 /// Generate the world transformation from the given camera data.
+///
 pub fn camera_to_world_matrix<N>(eye: Vector3<N>, gaze: Vector3<N>, top: Vector3<N>) -> Matrix4<N>
     where N: BaseFloat
 {
@@ -49,14 +51,19 @@ pub fn camera_to_world_matrix<N>(eye: Vector3<N>, gaze: Vector3<N>, top: Vector3
                  m14, m24, m34, m44)
 }
 
+///
+/// Generates the world to camera matrix.
+///
 pub fn world_to_camera_matrix<N>(eye: Vector3<N>, gaze: Vector3<N>, top: Vector3<N>) -> Matrix4<N>
     where N: BaseFloat
 {
     camera_to_world_matrix(eye, gaze, top).inverse().unwrap()
 }
 
+///
 /// Generate the perspective matrix from creating perspective projection
 /// transformations. This is for looking down the negative z-axis.
+///
 pub fn perspective_matrix<N>(near: N, far: N) -> Matrix4<N>
     where N: BaseFloat 
 {
@@ -88,7 +95,9 @@ pub fn perspective_matrix<N>(near: N, far: N) -> Matrix4<N>
                  m14, m24, m34, m44)
 }
 
+///
 /// Constructs a translation matrix from a three-dimensional vector. 
+///
 pub fn translation_matrix<N>(eye: Vector3<N>) -> Matrix4<N>
     where N: BaseFloat
 {
@@ -118,7 +127,9 @@ pub fn translation_matrix<N>(eye: Vector3<N>) -> Matrix4<N>
                  m14, m24, m34, m44)
 }
 
+///
 /// Constructs a rotation matrix from a set of coordinate axes.
+///
 pub fn rotation_matrix<N>(gaze: Vector3<N>, top: Vector3<N>) -> Matrix4<N>
     where N: BaseFloat
 {
@@ -154,8 +165,10 @@ pub fn rotation_matrix<N>(gaze: Vector3<N>, top: Vector3<N>) -> Matrix4<N>
                  m14, m24, m34, m44)
 }
 
+///
 /// Convert from projected coordinates to the canonical view 
 /// volume [-1, 1] x [-1, 1] x [-1, 1].
+///
 pub fn orthographic_matrix<N>(left: N, 
                               right: N, 
                               top: N, 
@@ -193,8 +206,10 @@ pub fn orthographic_matrix<N>(left: N,
                  m14, m24, m34, m44)
 }
 
+///
 /// Perspective projection transformation. This takes us from camera coordinates to
 /// the canonical view volume.
+///
 pub fn perspective_projection_matrix<N>(left: N, 
                                         right: N,
                                         top: N, 
@@ -230,6 +245,7 @@ pub fn perspective_projection_matrix<N>(left: N,
                  m14, m24, m34, m44)
 }
 
+///
 /// Compute the viewport, (windowing) transformation. This takes vertices
 /// from the canonical view volume (projection coordinates) to pixel coordinates.
 /// This depends only on the width of the image (to be used for calculating colors in 
@@ -239,6 +255,7 @@ pub fn perspective_projection_matrix<N>(left: N,
 /// of pixels going in the x-direction, and n_y is the number of pixels going in the 
 /// y-direction, i.e. (n_x, n_y) is the resolution of the screen. A pixel is one unit
 /// wide in this coordinate system.
+///
 use std::fmt;
 pub fn viewport_matrix<N>(num_x: usize, num_y: usize) -> Matrix4<N>
     where N: BaseFloat + fmt::Debug
@@ -339,8 +356,10 @@ pub fn compute_edge<N>(v1: &Point3<N>,
     (p.x - v1.x)*(v2.y - v1.y) - (p.y - v1.y)*(v2.x - v1.x)
 }
 
+///
 /// Compute the coordinates of a ray in barycentric coordinates. The coordinates
 /// `v0`, `v1`, and `v2` are assumed to be in clockwise order.
+///
 pub fn barycentric_coords<N>(v0: &Point3<N>,
                              v1: &Point3<N>,
                              v2: &Point3<N>,
@@ -354,7 +373,9 @@ pub fn barycentric_coords<N>(v0: &Point3<N>,
     Point3::new(w0, w1, w2)
 }
 
+///
 /// Computes the area of a triangle primitive.
+///
 pub fn compute_area<N>(v0: &Point3<N>,
                        v1: &Point3<N>,
                        v2: &Point3<N>,) -> N

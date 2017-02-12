@@ -1,3 +1,4 @@
+#![crate_name="graphics"]
 extern crate nalgebra;
 extern crate num_traits;
 
