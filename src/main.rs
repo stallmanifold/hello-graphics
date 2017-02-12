@@ -16,7 +16,6 @@ use color::Rgb;
 use std::fs::File;
 use ppm::NetPBMEncoder;
 
-// TODO: Add perspective correction to gouraud model.
 
 fn make_buffer(size: usize) -> Box<Vec<u8>> {
     let mut buf = Box::new(Vec::with_capacity(size));
