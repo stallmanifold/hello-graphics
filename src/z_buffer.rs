@@ -86,7 +86,7 @@ impl<'a, N: 'a> Iterator for ZBufferLineIter<'a, N> {
 }
 
 impl<N> ops::Index<usize> for ZBuffer<N> where N: BaseFloat {
-    type Output = Vec<N>;
+    type Output = [N];
 
     fn index(&self, index: usize) -> &Self::Output {
         &self.buf[index]
@@ -94,7 +94,7 @@ impl<N> ops::Index<usize> for ZBuffer<N> where N: BaseFloat {
 }
 
 impl<'a, N> ops::Index<usize> for &'a ZBuffer<N> where N: BaseFloat {
-    type Output = Vec<N>;
+    type Output = [N];
 
     fn index(&self, index: usize) -> &Self::Output {
         &self.buf[index]

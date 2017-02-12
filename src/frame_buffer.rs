@@ -91,17 +91,17 @@ impl<'a> Iterator for ScanlineIter<'a> {
 }
 
 impl ops::Index<usize> for FrameBuffer {
-    type Output = Vec<Rgb>;
+    type Output = [Rgb];
 
-    fn index(&self, index: usize) -> &Vec<Rgb> {
+    fn index(&self, index: usize) -> &Self::Output {
         &self.buf[index]
     } 
 }
 
 impl<'a> ops::Index<usize> for &'a FrameBuffer {
-    type Output = Vec<Rgb>;
+    type Output = [Rgb];
 
-    fn index(&self, index: usize) -> &Vec<Rgb> {
+    fn index(&self, index: usize) -> &Self::Output {
         &self.buf[index]
     } 
 }
