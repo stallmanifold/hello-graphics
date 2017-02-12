@@ -20,6 +20,25 @@ pub fn color_rgb(color: Vector3<f32>) -> Rgb {
     Rgb::from_channels(r, g, b)
 }
 
+/// Perspective correct vertex attributes
+#[inline(always)]
+pub fn perspective_correct<N>(position: Point3<N>, 
+                              vertex: Vector3<N>) -> Vector3<N> 
+    where N: BaseFloat
+{
+    Vector3::new(vertex.x / position.z, vertex.y / position.z, vertex.z)
+}
+
+/// Perspective correct vertex attributes in place.
+#[inline(always)]
+pub fn perspective_correct_inplace<N>(position: Point3<N>, 
+                                      vertex: &mut Vector3<N>) 
+    where N: BaseFloat
+{
+    vertex.x /= position.z;
+    vertex.y /= position.z;
+}
+
 #[cfg(test)]
 mod tests {
     

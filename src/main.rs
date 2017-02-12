@@ -47,7 +47,7 @@ fn main() {
     let top: Vector3<f32> = Vector3::new(0.0, 1.0, 0.0);
 
     let width: usize = 512;
-    let height: usize =     512;
+    let height: usize = 512;
     // perspective matrix parameters.
     let l = -40.0; 
     let r = 40.0;
@@ -61,15 +61,22 @@ fn main() {
     let m_vp  = raster::viewport_matrix::<f32>(width, height);
     let m_total = m_vp * m_per * m_cam;
 
-    let v0_vp = m_total * (v0.to_homogeneous());
-    let v1_vp = m_total * (v1.to_homogeneous());
-    let v2_vp = m_total * (v2.to_homogeneous());
+    let v0_vp = m_total * v0.to_homogeneous();
+    let v1_vp = m_total * v1.to_homogeneous();
+    let v2_vp = m_total * v2.to_homogeneous();
 
-    let v0 = FromHomogeneous::from(&v0_vp);
-    let v1 = FromHomogeneous::from(&v1_vp);
-    let v2 = FromHomogeneous::from(&v2_vp);
+    let v0: Point3<f32> = FromHomogeneous::from(&v0_vp);
+    let v1: Point3<f32> = FromHomogeneous::from(&v1_vp);
+    let v2: Point3<f32> = FromHomogeneous::from(&v2_vp);
+    // Perspective correction
+    let c0_pc = shade::perspective_correct(v0, c0);
+    let c1_pc = shade::perspective_correct(v1, c1);
+    let c2_pc = shade::perspective_correct(v2, c2);
 
     let area: f32 = raster::compute_area(&v0, &v1, &v2);
+    let one_over_z0 = 1.0 / v0.z;
+    let one_over_z1 = 1.0 / v1.z;
+    let one_over_z2 = 1.0 / v2.z;
 
     // Initialize the z buffer and frame buffer.
     let mut z_buffer: Box<ZBuffer<f32>> = z_buffer::z_buffer(width, height);
@@ -82,7 +89,9 @@ fn main() {
             let mut w = raster::barycentric_coords(&v0, &v1, &v2, &pixel);
             if (w[0] >= 0.0) && (w[1] >= 0.0) && (w[2] >= 0.0) {
                 w /= area;
-                let color = shade::gouraud(c0, c1, c2, w);
+                // Apply perspective correction.
+                let z = 1.0 / (w[0] * one_over_z0 + w[1] * one_over_z1 + w[2] * one_over_z2);
+                let color = z * shade::gouraud(c0_pc, c1_pc, c2_pc, w);
                 let rgb = shade::color_rgb(color);
                 frame_buffer[i][j] = rgb;
             }
@@ -93,7 +102,7 @@ fn main() {
     
     frame_buffer.dump_frame(&mut *buf)
                 .expect("Could not write into buffer!");
-                
+
     let mut f: File = File::create("triangle.ppm").expect("Could not create file.");
     let mut ppm = NetPBMEncoder::new(ppm::NetPBM::PixMapAscii, &mut f);
     let _ = ppm.encode(&buf, width as u32, height as u32);
