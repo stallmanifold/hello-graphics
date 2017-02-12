@@ -93,19 +93,7 @@ fn main() {
     
     frame_buffer.dump_frame(&mut *buf)
                 .expect("Could not write into buffer!");
-    
-    /*
-    for line in frame_buffer.scanlines() {
-        for pixel in line.iter() {
-            if pixel[0] == 0 {
-                print!("{:X}", 0);
-            } else {
-                print!("{:X}", 1);
-            }
-        }
-        println!();
-    }
-    */
+                
     let mut f: File = File::create("triangle.ppm").expect("Could not create file.");
     let mut ppm = NetPBMEncoder::new(ppm::NetPBM::PixMapAscii, &mut f);
     let _ = ppm.encode(&buf, width as u32, height as u32);
