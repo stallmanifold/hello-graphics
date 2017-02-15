@@ -17,10 +17,10 @@ use std::fs::File;
 use ppm::NetPBMEncoder;
 
 
-fn make_buffer(size: usize, color: u8) -> Box<Vec<u8>> {
+fn make_buffer(size: usize) -> Box<Vec<u8>> {
     let mut buf = Box::new(Vec::with_capacity(size));
     for _ in 0..buf.capacity() {
-        buf.push(color);
+        buf.push(0x00);
     }
 
     buf
@@ -28,14 +28,14 @@ fn make_buffer(size: usize, color: u8) -> Box<Vec<u8>> {
 
 fn main() {
     // The triangle in world space.
-    let v0: Point3<f32> = Point3::new(30.0, 30.0, 0.0);
-    let v1: Point3<f32> = Point3::new(30.0, -30.0, 0.0);
-    let v2: Point3<f32> = Point3::new(-30.0, -30.0, 0.0);
+    let v0: Point3<f32> = Point3::new(-30.0, -30.0, 0.0);
+    let v1: Point3<f32> = Point3::new(30.0, 30.0, 0.0);
+    let v2: Point3<f32> = Point3::new(30.0, -30.0, 0.0);
     
     // Color attributes at triangle vertices.
-    let c0: Vector3<f32> = Vector3::new(0.0, 0.0, 1.0);
+    let c0: Vector3<f32> = Vector3::new(1.0, 0.0, 0.0);
     let c1: Vector3<f32> = Vector3::new(0.0, 1.0, 0.0);
-    let c2: Vector3<f32> = Vector3::new(1.0, 0.0, 0.0);
+    let c2: Vector3<f32> = Vector3::new(0.0, 0.0, 1.0);
 
     // We place a camera focal point on the z axis x units in the 
     // positive direction. This puts it in front of the triangle that way.
@@ -87,17 +87,16 @@ fn main() {
     for i in 0..height {
         for j in 0..width {
             let pixel = Point3::new((i as f32) + 0.5, (j as f32) + 0.5, 0.0);
-            let mut w = raster::barycentric_coords(&v0, &v1, &v2, &pixel);
+            let mut w = raster::barycentric_coords(&v2, &v0, &v1, &pixel);
             if (w[0] >= 0.0) && (w[1] >= 0.0) && (w[2] >= 0.0) {
                 w /= area;
                 // Apply perspective correction.
                 //let z = 1.0 / (w[0] * one_over_z0 + w[1] * one_over_z1 + w[2] * one_over_z2);
                 //let color = z * shade::gouraud(c0_pc, c1_pc, c2_pc, w);
-                let st0 = Vector2::new(1.0, 0.0);
+                let st0 = Vector2::new(0.0, 0.0);
                 let st1 = Vector2::new(0.0, 1.0);
-                let st2 = Vector2::new(0.0, 0.0);
+                let st2 = Vector2::new(1.0, 0.0);
                 let color = shade::checkerboard(st0, st1, st2, v0, v1, v2, w);
-
                 let rgb = shade::color_rgb(color);
                 frame_buffer[i][j] = rgb;
             } else {
@@ -107,7 +106,7 @@ fn main() {
         }
     }
 
-    let mut buf = make_buffer(Rgb::channel_count() * height * width, 0x00);
+    let mut buf = make_buffer(Rgb::channel_count() * height * width);
     
     frame_buffer.dump_frame(&mut *buf)
                 .expect("Could not write into buffer!");

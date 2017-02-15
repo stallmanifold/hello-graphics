@@ -381,7 +381,7 @@ pub fn compute_area<N>(v0: &Point3<N>,
                        v2: &Point3<N>,) -> N
     where N: BaseFloat
 {
-    compute_edge(v0, v1, v2)
+    compute_edge(v0, v1, v2).abs()
 }
 
 #[cfg(test)]

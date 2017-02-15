@@ -79,6 +79,6 @@ impl<'a> From<&'a [u8; 3]> for Rgb {
 
 impl fmt::Display for Rgb {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "Rgb(0x{:x}, 0x{:x}, 0x{:x})", self.data[0], self.data[1], self.data[2])
+        write!(f, "0x{:X}{:X}{:X}", self.data[0], self.data[1], self.data[2])
     }
 }
