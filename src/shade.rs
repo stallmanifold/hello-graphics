@@ -1,4 +1,4 @@
-use nalgebra::{Vector3, Point3};
+use nalgebra::{Vector2, Vector3, Point3};
 use nalgebra::{BaseFloat};
 use color::Rgb;
 
@@ -13,6 +13,31 @@ pub fn gouraud<N>(color0: Vector3<N>,
     where N: BaseFloat
 {
     color0 * bary[0] + color1 * bary[1] + color2 * bary[2]
+}
+
+///
+/// Peform a checkerboard shading at a point on a triangle primitive.
+/// This computation performs perspective correction.
+///
+pub fn checkerboard(st0: Vector2<f32>,
+                    st1: Vector2<f32>,
+                    st2: Vector2<f32>,
+                    v0:  Point3<f32>,
+                    v1:  Point3<f32>,
+                    v2:  Point3<f32>,
+                    w:   Point3<f32>) -> Vector3<f32>
+{
+    let mut s = w[0]*st0[0] + w[1]*st1[0] + w[2]*st2[0];
+    let mut t = w[0]*st0[1] + w[1]*st1[1] + w[2]*st2[1];
+    let z = 1.0 / (w[0]*v0[2] + w[1]*v1[2] + w[2]*v2[2]);
+    let m = 10.0;
+
+    s *= z;
+    t *= z;
+
+    let p = ((((s*m % 1.0 > 0.5) as usize) ^ (t*m % 1.0 < 0.5) as usize)) as f32;
+
+    Vector3::new(p,p,p)
 }
 
 ///

@@ -10,7 +10,7 @@ mod shade;
 mod color;
 mod ppm;
 
-use nalgebra::{Vector3, Point3, FromHomogeneous, ToHomogeneous};
+use nalgebra::{Vector2, Vector3, Point3, FromHomogeneous, ToHomogeneous};
 use z_buffer::ZBuffer;
 use color::Rgb;
 use std::fs::File;
@@ -81,6 +81,8 @@ fn main() {
     let mut z_buffer: Box<ZBuffer<f32>> = z_buffer::z_buffer(width, height);
     let mut frame_buffer = frame_buffer::frame_buffer(width, height);
 
+    let default_rgb = Rgb::from_channels(0x3B, 0x7A, 0x57);
+
     // Render the current scene.
     for i in 0..height {
         for j in 0..width {
@@ -89,10 +91,18 @@ fn main() {
             if (w[0] >= 0.0) && (w[1] >= 0.0) && (w[2] >= 0.0) {
                 w /= area;
                 // Apply perspective correction.
-                let z = 1.0 / (w[0] * one_over_z0 + w[1] * one_over_z1 + w[2] * one_over_z2);
-                let color = z * shade::gouraud(c0_pc, c1_pc, c2_pc, w);
+                //let z = 1.0 / (w[0] * one_over_z0 + w[1] * one_over_z1 + w[2] * one_over_z2);
+                //let color = z * shade::gouraud(c0_pc, c1_pc, c2_pc, w);
+                let st0 = Vector2::new(1.0, 0.0);
+                let st1 = Vector2::new(0.0, 1.0);
+                let st2 = Vector2::new(0.0, 0.0);
+                let color = shade::checkerboard(st0, st1, st2, v0, v1, v2, w);
+
                 let rgb = shade::color_rgb(color);
                 frame_buffer[i][j] = rgb;
+            } else {
+                // Use a background color.
+                frame_buffer[i][j] = default_rgb;
             }
         }
     }
