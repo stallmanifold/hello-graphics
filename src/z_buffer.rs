@@ -112,8 +112,8 @@ impl<N> ops::IndexMut<usize> for ZBuffer<N> where N: BaseFloat {
 mod tests {
     #[test]
     fn test_z_buffer_should_correctly_report_dimensions() {
-        let width  = 512;
-        let height = 512;
+        let width  = 128;
+        let height = 128;
         let buf = super::z_buffer::<f32>(width, height);
 
         assert_eq!(buf.width(), width);
@@ -128,8 +128,8 @@ mod tests {
     fn test_z_buffer_should_have_only_infinite_values_after_initialization() {
         use num_traits::Float;
 
-        let width  = 512;
-        let height = 512;
+        let width  = 128;
+        let height = 128;
         let buf = super::z_buffer::<f32>(width, height);
         let inf: f32 = Float::infinity();
 

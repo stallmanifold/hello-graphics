@@ -81,7 +81,7 @@ fn main() {
     let mut z_buffer: Box<ZBuffer<f32>> = z_buffer::z_buffer(width, height);
     let mut frame_buffer = frame_buffer::frame_buffer(width, height);
 
-    let default_rgb = Rgb::from_channels(0x3B, 0x7A, 0x57);
+    let default_rgb = Rgb::from_channels(0x3B, 0x44, 0x4B);
 
     // Render the current scene.
     for i in 0..height {

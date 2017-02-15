@@ -68,7 +68,7 @@ impl FrameBuffer {
         }
     }
 
-    pub fn scanlines(&self) -> ScanlineIter {
+    pub fn lines(&self) -> ScanlineIter {
         ScanlineIter {
             index: 0,
             lines: &self.buf
@@ -131,19 +131,19 @@ mod tests {
         assert_eq!(buf.width(), width);
         assert_eq!(buf.height(), height);
 
-        for line in buf.scanlines() {
+        for line in buf.lines() {
             assert_eq!(line.len(), buf.width());
         }
     }
 
     #[test]
     fn test_frame_buffer_should_be_zero_after_initialization() {
-        let width  = 512;
-        let height = 512;
+        let width  = 128;
+        let height = 128;
         let buf  = super::frame_buffer(width, height);
         let zero = Rgb::from_channels(0,0,0);
 
-        for line in buf.scanlines() {
+        for line in buf.lines() {
             for pixel in line {
                 assert_eq!(pixel, &zero);
             }
