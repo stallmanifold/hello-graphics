@@ -33,9 +33,13 @@ impl FrameBuffer {
     }
 
     pub fn initialize(&mut self) {
-        for i in 0..self.height {
+        self.initialize_with(Rgb::from_channels(0,0,0));
+    }
+
+    pub fn initialize_with(&mut self, rgb: Rgb) {
+        for row in 0..self.height {
             for _ in 0..self.width {
-                self.buf[i].push(Rgb::from_channels(0,0,0));
+                self.buf[row].push(rgb);
             }
         }
     }
@@ -111,6 +115,7 @@ impl ops::IndexMut<usize> for FrameBuffer {
         &mut self.buf[index]
     }
 }
+
 
 #[cfg(test)]
 mod tests {

@@ -17,10 +17,10 @@ use std::fs::File;
 use ppm::NetPBMEncoder;
 
 
-fn make_buffer(size: usize) -> Box<Vec<u8>> {
+fn make_buffer(size: usize, color: u8) -> Box<Vec<u8>> {
     let mut buf = Box::new(Vec::with_capacity(size));
     for _ in 0..buf.capacity() {
-        buf.push(0x00);
+        buf.push(color);
     }
 
     buf
@@ -97,12 +97,13 @@ fn main() {
         }
     }
 
-    let mut buf = make_buffer(Rgb::channel_count() * height * width);
+    let mut buf = make_buffer(Rgb::channel_count() * height * width, 0x00);
     
     frame_buffer.dump_frame(&mut *buf)
                 .expect("Could not write into buffer!");
 
-    let mut f: File = File::create("triangle.ppm").expect("Could not create file.");
+    let mut f: File = File::create("triangle.ppm")
+                           .expect("Could not create file.");
     let mut ppm = NetPBMEncoder::new(ppm::NetPBM::PixMapAscii, &mut f);
     let _ = ppm.encode(&buf, width as u32, height as u32);
 }

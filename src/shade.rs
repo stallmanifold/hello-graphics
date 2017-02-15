@@ -27,7 +27,7 @@ pub fn color_rgb(color: Vector3<f32>) -> Rgb {
 }
 
 ///
-/// Perspective correct vertex attributes
+/// Perspective correct vertex attributes.
 ///
 #[inline(always)]
 pub fn perspective_correct<N>(position: Point3<N>, 
@@ -48,6 +48,7 @@ pub fn perspective_correct_inplace<N>(position: Point3<N>,
     vertex.x /= position.z;
     vertex.y /= position.z;
 }
+
 
 #[cfg(test)]
 mod tests {
