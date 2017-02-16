@@ -4,7 +4,7 @@ use nalgebra::{Cross, Norm, BaseFloat, Inverse};
 use util;
 
 
-/// TODO: Check divisions for zeros in matrix code.
+/// TODO: Check divisions for _0s in matrix code.
 /// TODO: Convert all raster functions to homogeneous 4D coordinates.
 /// TODO: Make interface to raster functions consistent (with pointers to data types instead of copying them.)
 
@@ -15,10 +15,10 @@ pub fn camera_to_world_matrix<N>(eye: Vector3<N>, gaze: Vector3<N>, top: Vector3
     where N: BaseFloat
 {
     // The vectors are all cast into homogeneous coordinates here. Points are affected
-    // by translation, so `eye` has a `1` in its fourth component, while vectors are
-    // not affected by translation, so they have a `0` in their fourth components.
-    let zero = N::zero();
-    let one = N::one();
+    // by translation, so `eye` has a `1` in its fourth comp_1nt, while vectors are
+    // not affected by translation, so they have a `0` in their fourth comp_1nts.
+    let _0 = N::zero();
+    let _1 = N::one();
     
     let w = -gaze / gaze.norm();
     let top_cross_w = top.cross(&w);
@@ -37,14 +37,14 @@ pub fn camera_to_world_matrix<N>(eye: Vector3<N>, gaze: Vector3<N>, top: Vector3
     let m23 = v.z;
     let m33 = w.z;
     let m43 = eye.z;
-    let m14 = zero;
-    let m24 = zero;
-    let m34 = zero;
-    let m44 = one;
+    let m14 = _0;
+    let m24 = _0;
+    let m34 = _0;
+    let m44 = _1;
 
     // Transformations in graphics tend to be 4x4 so we can take advantage 
     // of homogeneous coordinates. This converts translations from affine transformations
-    // to linear ones in one greater dimension.
+    // to linear _1s in _1 greater dimension.
     Matrix4::new(m11, m21, m31, m41,
                  m12, m22, m32, m42,
                  m13, m23, m33, m43,
@@ -69,25 +69,25 @@ pub fn perspective_matrix<N>(near: N, far: N) -> Matrix4<N>
 {
     assert!(near > far);
 
-    let zero = N::zero();
-    let one = N::one();
+    let _0 = N::zero();
+    let _1 = N::one();
 
     let m11 = near;
-    let m21 = zero;
-    let m31 = zero;
-    let m41 = zero;
-    let m12 = zero;
+    let m21 = _0;
+    let m31 = _0;
+    let m41 = _0;
+    let m12 = _0;
     let m22 = near;
-    let m32 = zero;
-    let m42 = zero;
-    let m13 = zero;
-    let m23 = zero;
+    let m32 = _0;
+    let m42 = _0;
+    let m13 = _0;
+    let m23 = _0;
     let m33 = near + far;
     let m43 = -far * near;
-    let m14 = zero;
-    let m24 = zero;
-    let m34 = one;
-    let m44 = zero; 
+    let m14 = _0;
+    let m24 = _0;
+    let m34 = _1;
+    let m44 = _0; 
 
     Matrix4::new(m11, m21, m31, m41,
                  m12, m22, m32, m42,
@@ -101,25 +101,25 @@ pub fn perspective_matrix<N>(near: N, far: N) -> Matrix4<N>
 pub fn translation_matrix<N>(eye: Vector3<N>) -> Matrix4<N>
     where N: BaseFloat
 {
-    let zero = N::zero();
-    let one = N::one();
+    let _0 = N::zero();
+    let _1 = N::one();
 
-    let m11 = one;
-    let m21 = zero;
-    let m31 = zero;
+    let m11 = _1;
+    let m21 = _0;
+    let m31 = _0;
     let m41 = eye.x;
-    let m12 = zero;
-    let m22 = one;
-    let m32 = zero;
+    let m12 = _0;
+    let m22 = _1;
+    let m32 = _0;
     let m42 = eye.y;
-    let m13 = zero;
-    let m23 = zero;
-    let m33 = one;
+    let m13 = _0;
+    let m23 = _0;
+    let m33 = _1;
     let m43 = eye.z;
-    let m14 = zero;
-    let m24 = zero;
-    let m34 = zero;
-    let m44 = one; 
+    let m14 = _0;
+    let m24 = _0;
+    let m34 = _0;
+    let m44 = _1; 
 
     Matrix4::new(m11, m21, m31, m41,
                  m12, m22, m32, m42,
@@ -133,8 +133,8 @@ pub fn translation_matrix<N>(eye: Vector3<N>) -> Matrix4<N>
 pub fn rotation_matrix<N>(gaze: Vector3<N>, top: Vector3<N>) -> Matrix4<N>
     where N: BaseFloat
 {
-    let zero = N::zero();
-    let one  = N::one();
+    let _0 = N::zero();
+    let _1  = N::one();
 
     // Compute the orientation of the world space axes in the rotated space.
     let w = -gaze / gaze.norm();
@@ -145,19 +145,19 @@ pub fn rotation_matrix<N>(gaze: Vector3<N>, top: Vector3<N>) -> Matrix4<N>
     let m11 = u.x;
     let m21 = u.y;
     let m31 = u.z;
-    let m41 = zero;
+    let m41 = _0;
     let m12 = v.x;
     let m22 = v.y;
     let m32 = v.z;
-    let m42 = zero;
+    let m42 = _0;
     let m13 = w.x;
     let m23 = w.y;
     let m33 = w.z;
-    let m43 = zero;
-    let m14 = zero;
-    let m24 = zero;
-    let m34 = zero;
-    let m44 = one;
+    let m43 = _0;
+    let m14 = _0;
+    let m24 = _0;
+    let m34 = _0;
+    let m44 = _1;
 
     Matrix4::new(m11, m21, m31, m41,
                  m12, m22, m32, m42,
@@ -179,26 +179,26 @@ pub fn orthographic_matrix<N>(left: N,
 {
     assert!(near > far);
 
-    let zero = N::zero();
-    let one  = N::one();
-    let two  = one + one;
+    let _0 = N::zero();
+    let _1  = N::one();
+    let two  = _1 + _1;
 
     let m11 = two / (right - left);
-    let m21 = zero;
-    let m31 = zero;
+    let m21 = _0;
+    let m31 = _0;
     let m41 = -(right + left) / (right - left);
-    let m12 = zero;
+    let m12 = _0;
     let m22 = two / (top - bottom);
-    let m32 = zero;
+    let m32 = _0;
     let m42 = -(top + bottom) / (top - bottom);
-    let m13 = zero;
-    let m23 = zero;
+    let m13 = _0;
+    let m23 = _0;
     let m33 = two / (near - far);
     let m43 = -((near + far) / (near - far));
-    let m14 = zero;
-    let m24 = zero;
-    let m34 = zero;
-    let m44 = one;
+    let m14 = _0;
+    let m24 = _0;
+    let m34 = _0;
+    let m44 = _1;
 
     Matrix4::new(m11, m21, m31, m41,
                  m12, m22, m32, m42,
@@ -218,26 +218,26 @@ pub fn perspective_projection_matrix<N>(left: N,
                                         far: N) -> Matrix4<N> 
     where N: BaseFloat
 {
-    let zero = N::zero();
-    let one = N::one();
-    let two = one + one;
+    let _0 = N::zero();
+    let _1 = N::one();
+    let two = _1 + _1;
 
     let m11 = (two * near) / (right - left);
-    let m21 = zero;
+    let m21 = _0;
     let m31 = (left + right) / (left - right);
-    let m41 = zero;
-    let m12 = zero;
+    let m41 = _0;
+    let m12 = _0;
     let m22 = (two * near) / (top - bottom);
     let m32 = (bottom + top) / (bottom - top);
-    let m42 = zero;
-    let m13 = zero;
-    let m23 = zero;
+    let m42 = _0;
+    let m13 = _0;
+    let m23 = _0;
     let m33 = (far + near) / (near - far);
     let m43 = (two * far * near) / (far - near);
-    let m14 = zero;
-    let m24 = zero;
-    let m34 = one;
-    let m44 = zero;
+    let m14 = _0;
+    let m24 = _0;
+    let m34 = _1;
+    let m44 = _0;
 
     Matrix4::new(m11, m21, m31, m41,
                  m12, m22, m32, m42,
@@ -253,45 +253,45 @@ pub fn perspective_projection_matrix<N>(left: N,
 /// an orthographic (length preserving) transformation. This casts vertices into the
 /// coordinate system [-0.5, n_x - 0.5] x [-0.5, n_y - 0.5], where n_x is the number 
 /// of pixels going in the x-direction, and n_y is the number of pixels going in the 
-/// y-direction, i.e. (n_x, n_y) is the resolution of the screen. A pixel is one unit
+/// y-direction, i.e. (n_x, n_y) is the resolution of the screen. A pixel is _1 unit
 /// wide in this coordinate system.
 ///
 use std::fmt;
 pub fn viewport_matrix<N>(num_x: usize, num_y: usize) -> Matrix4<N>
     where N: BaseFloat + fmt::Debug
 {
-    let zero = N::zero();
-    let one  = N::one();
-    let two  = one + one;
+    let _0 = N::zero();
+    let _1  = N::one();
+    let two  = _1 + _1;
 
     // Approximate num_x using type N.
-    let mut image_width = zero;
+    let mut image_width = _0;
     for _ in 0..num_x {
-        image_width += one;
+        image_width += _1;
     }
 
     // Approximate num_y using type N.
-    let mut image_height = zero;
+    let mut image_height = _0;
     for _ in 0..num_y {
-        image_height += one;
+        image_height += _1;
     }
 
     let m11 = image_width / two;
-    let m21 = zero;
-    let m31 = zero;
-    let m41 = (image_width - one) / two;
-    let m12 = zero;
+    let m21 = _0;
+    let m31 = _0;
+    let m41 = (image_width - _1) / two;
+    let m12 = _0;
     let m22 = image_height / two;
-    let m32 = zero;
-    let m42 = (image_height - one) / two;
-    let m13 = zero;
-    let m23 = zero;
-    let m33 = one;
-    let m43 = zero;
-    let m14 = zero;
-    let m24 = zero;
-    let m34 = zero;
-    let m44 = one;
+    let m32 = _0;
+    let m42 = (image_height - _1) / two;
+    let m13 = _0;
+    let m23 = _0;
+    let m33 = _1;
+    let m43 = _0;
+    let m14 = _0;
+    let m24 = _0;
+    let m34 = _0;
+    let m44 = _1;
 
     Matrix4::new(m11, m21, m31, m41,
                  m12, m22, m32, m42,
