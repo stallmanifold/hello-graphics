@@ -43,6 +43,7 @@ pub fn checkerboard(st0: Vector2<f32>,
 ///
 /// Calculate the RGB color of a color vector.
 ///
+#[inline(always)]
 pub fn color_rgb(color: Vector3<f32>) -> Rgb {
     let r = (255.0 * color.x).trunc() as u8;
     let g = (255.0 * color.y).trunc() as u8;
