@@ -6,6 +6,7 @@ mod raster;
 mod z_buffer;
 mod frame_buffer;
 mod util;
+mod mesh;
 mod shade;
 mod color;
 mod ppm;
