@@ -1,13 +1,14 @@
 use nalgebra::{BaseFloat, Point3};
 use std::marker::PhantomData;
 use std::ops;
+use std::convert::AsRef;
 
 
 type VertexIdx = usize;
-
+type Vertex<N> = Point3<N>;
 
 struct VertexMap<N> where N: BaseFloat {
-    data: Box<Vec<Point3<N>>>,
+    data: Box<Vec<Vertex<N>>>,
 }
 
 impl<N> VertexMap<N> where N: BaseFloat {
@@ -22,8 +23,12 @@ impl<N> VertexMap<N> where N: BaseFloat {
         self.data.is_empty()
     }
 
-    fn push(&mut self, vertex: Point3<N>) {
+    fn push(&mut self, vertex: Vertex<N>) {
         self.data.push(vertex);
+    }
+
+    fn lookup(&self, index: VertexIdx) -> Option<&Vertex<N>> {
+        self.data.get(index)
     }
 
     #[inline]
@@ -36,20 +41,26 @@ impl<N> VertexMap<N> where N: BaseFloat {
         self.data.capacity()
     }
 
-    fn as_slice(&self) -> &[Point3<N>] {
-        &self.data
+    fn as_slice(&self) -> &[Vertex<N>] {
+        self.data.as_slice()
     }
 }
 
 impl<N> ops::Index<VertexIdx> for VertexMap<N> where N: BaseFloat {
-    type Output = Point3<N>;
+    type Output = Vertex<N>;
 
     fn index(&self, _index: VertexIdx) -> &Self::Output {
         &self.data[_index]
     }
 }
 
-/// A Face is a triangle on the face of a simplex. The face stores the
+impl<N> AsRef<[Vertex<N>]> for VertexMap<N> where N: BaseFloat {
+    fn as_ref(&self) -> &[Vertex<N>] {
+        self.data.as_ref()
+    }
+}
+
+/// A Face is a triangle on the outside of a simplex. The face stores the
 /// vertices in clockwise order.
 #[derive(Copy, Clone, Debug, Eq, PartialEq)]
 struct Face<N> {
@@ -57,6 +68,12 @@ struct Face<N> {
     pub v1: VertexIdx,
     pub v2: VertexIdx,
     _phantom: PhantomData<N>,
+}
+
+impl<N> Face<N> {
+    fn len(&self) -> usize {
+        3
+    }
 }
 
 impl<N> ops::Index<usize> for Face<N> where N: BaseFloat {
@@ -98,6 +115,10 @@ impl<N> FaceMap<N> where N: BaseFloat {
         self.data.push(*face);
     }
 
+    fn lookup(&self, index: FaceIdx) -> Option<&Face<N>> {
+        self.data.get(index)
+    }
+
     #[inline]
     fn len(&self) -> usize {
         self.data.len()
@@ -109,7 +130,7 @@ impl<N> FaceMap<N> where N: BaseFloat {
     }
 
     fn as_slice(&self) -> &[Face<N>] {
-        &self.data
+        self.data.as_slice()
     }
 }
 
@@ -118,6 +139,12 @@ impl<N> ops::Index<FaceIdx> for FaceMap<N> {
 
     fn index(&self, _index: usize) -> &Self::Output {
         &self.data[_index]
+    }
+}
+
+impl<N> AsRef<[Face<N>]> for FaceMap<N> {
+    fn as_ref(&self) -> &[Face<N>] {
+        self.data.as_ref()
     }
 }
 
@@ -131,8 +158,7 @@ struct Mesh<N> where N: BaseFloat {
 }
 
 impl<N> Mesh<N> where N: BaseFloat {
-    /// Create a mesh with at most `nverts` vertices, `nedges` edges, and
-    /// `nfaces` faces.
+    /// Create a mesh with at most `n_verts` vertices, and `n_faces` faces.
     fn with_dims(n_verts: usize, n_faces: usize) -> Mesh<N> {
         Mesh {
             vertex_table: VertexMap::with_capacity(n_verts),
@@ -148,6 +174,22 @@ impl<N> Mesh<N> where N: BaseFloat {
     #[inline]
     fn face_count(&self) -> usize {
         self.face_table.len()
+    }
+
+    fn push_vertex(&mut self, vertex: Vertex<N>) {
+        self.vertex_table.push(vertex);
+    }
+
+    fn push_face(&mut self, face: &Face<N>) {
+        self.face_table.push(face);
+    }
+
+    fn vertices(&self) -> &[Vertex<N>] {
+        self.vertex_table.as_slice()
+    }
+
+    fn faces(&self) -> &[Face<N>] {
+        self.face_table.as_slice()
     }
 }
 
