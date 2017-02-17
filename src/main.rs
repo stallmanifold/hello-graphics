@@ -1,3 +1,5 @@
+#![feature(fn_traits)]
+#![feature(unboxed_closures)]
 #![crate_name="graphics"]
 extern crate nalgebra;
 extern crate num_traits;
@@ -10,6 +12,7 @@ mod mesh;
 mod shade;
 mod color;
 mod ppm;
+mod shader;
 
 use nalgebra::{Vector2, Vector3, Point3, FromHomogeneous, ToHomogeneous};
 use z_buffer::ZBuffer;

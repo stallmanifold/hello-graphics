@@ -1,3 +1,5 @@
+#![feature(fn_traits)]
+#![feature(unboxed_closures)]
 #![crate_name="graphics"]
 extern crate nalgebra;
 extern crate num_traits;
