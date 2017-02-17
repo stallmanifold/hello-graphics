@@ -36,9 +36,9 @@ struct Face {
 /// otherwise using vectors to tabulate simplex data will be very slow
 /// if we are going to be adding and deleting lots of simplices.
 struct Mesh<N> where N: BaseFloat {
-    vertex_table: Vec<Vertex<N>>,
-    edge_table: Vec<Edge>,
-    face_table: Vec<Face>,
+    vertex_table: Box<Vec<Vertex<N>>>,
+    edge_table:   Box<Vec<Edge>>,
+    face_table:   Box<Vec<Face>>,
 }
 
 impl<N> Mesh<N> where N: BaseFloat {
@@ -46,9 +46,9 @@ impl<N> Mesh<N> where N: BaseFloat {
     /// `nfaces` faces.
     fn new(nverts: usize, nedges: usize, nfaces: usize) -> Mesh<N> {
         Mesh {
-            vertex_table: Vec::with_capacity(nverts),
-            edge_table:   Vec::with_capacity(nedges),
-            face_table:   Vec::with_capacity(nfaces), 
+            vertex_table: Box::new(Vec::with_capacity(nverts)),
+            edge_table:   Box::new(Vec::with_capacity(nedges)),
+            face_table:   Box::new(Vec::with_capacity(nfaces)), 
         }
     }
 
