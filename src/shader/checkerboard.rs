@@ -3,17 +3,24 @@ use nalgebra::{Vector2, Vector3, Point3};
 use num_traits::Float;
 use num_integer::Integer;
 use alga::general::Real;
+use std::marker::PhantomData;
 
 
-pub fn shader(n_squares: usize) -> CheckerboardShader {
+pub fn shader<N: Float + Real>(n_squares: usize) -> CheckerboardShader<N> {
     CheckerboardShader::new(n_squares)
 }
 
-pub struct CheckerboardShader(usize);
+pub struct CheckerboardShader<N> {
+    n_squares: usize,
+    _phantom: PhantomData<N>,
+}
 
-impl CheckerboardShader {
-    fn new(n_squares: usize) -> CheckerboardShader {
-        CheckerboardShader(n_squares)
+impl<N> CheckerboardShader<N> where N: Float + Real {
+    fn new(n_squares: usize) -> CheckerboardShader<N> {
+        CheckerboardShader {
+            n_squares: n_squares,
+            _phantom: PhantomData,
+        }
     }
 }
 
@@ -28,14 +35,14 @@ type Args<N> = (Vector2<N>,
 
 macro_rules! checkerboard_impl {
     ($type_name : ty) => {
-        impl TextureMap<$type_name, Args<$type_name>> for CheckerboardShader {
+        impl TextureMap<$type_name, Args<$type_name>> for CheckerboardShader<$type_name> {
             fn apply(&self, args: Args<$type_name>) -> Vector3<$type_name> {
                 let z  = 1.0 / ((args.6)[0]*(args.3)[2] + (args.6)[1]*(args.4)[2] + (args.6)[2]*(args.5)[2]);
 
                 let s = z * ((args.6)[0]*(args.0)[0] + (args.6)[1]*(args.1)[0] + (args.6)[2]*(args.2)[0]);
                 let t = z * ((args.6)[0]*(args.0)[1] + (args.6)[1]*(args.1)[1] + (args.6)[2]*(args.2)[1]);
 
-                let m = self.0 as $type_name;
+                let m = self.n_squares as $type_name;
 
                 let p = ((((s*m % 1.0 > 0.5) as usize) ^ (t*m % 1.0 < 0.5) as usize)) as $type_name;
 
@@ -71,8 +78,8 @@ impl<N> TextureMap<N, Args<N>> for CheckerboardShader
 }
 */
 
-specific_fn_impl!(CheckerboardShader, f32, Args<f32>);
-specific_fn_impl!(CheckerboardShader, f64, Args<f64>);
+specific_fn_impl!(CheckerboardShader<f32>, f32, Args<f32>);
+specific_fn_impl!(CheckerboardShader<f64>, f64, Args<f64>);
 
 
 mod tests {
@@ -117,9 +124,9 @@ mod tests {
 
         let w: Point3<f32> = Point3::new(0.2, 0.4, 0.4);
 
-        let shader = super::shader(10);
+        let shader = super::shader::<f32>(10);
 
-        let given = shader.call((st0, st1, st2, v0, v1, v2, w));
+        let given = shader(st0, st1, st2, v0, v1, v2, w);
         let expected = checkerboard(st0, st1, st2, v0, v1, v2, w);
 
         assert_relative_eq!(given, expected);
