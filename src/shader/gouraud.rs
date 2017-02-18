@@ -4,25 +4,26 @@ use num_traits::Float;
 use alga::general::Real;
 
 
-pub fn shader() -> Gouraud {
-    Gouraud::Proc
+pub fn shader() -> GouraudShader {
+    GouraudShader::Proc
 }
 
-pub enum Gouraud { 
+pub enum GouraudShader { 
     Proc,
 }
 
-impl<N> TextureMap<N, (Vector3<N>, Vector3<N>, Vector3<N>, Point3<N>)> for Gouraud
+type Args<N> = (Vector3<N>, Vector3<N>, Vector3<N>, Point3<N>);
+
+impl<N> TextureMap<N, Args<N>> for GouraudShader
     where N: Float + Real 
 {
-    fn apply(&self, 
-              args: (Vector3<N>, Vector3<N>, Vector3<N>, Point3<N>)) -> Vector3<N> 
+    fn apply(&self, args: Args<N>) -> Vector3<N> 
     {
         args.0 * (args.3)[0] + args.1 * (args.3)[1] + args.2 * (args.3)[2]
     }
 }
 
-fn_impl!(Gouraud, N, (Vector3<N>, Vector3<N>, Vector3<N>, Point3<N>));
+fn_impl!(GouraudShader, N, Args<N>);
 
 
 #[cfg(test)]
@@ -44,7 +45,7 @@ mod tests {
     }
 
     #[test]
-    fn test_gouraud_map_should_yield_same_results_as_function() {
+    fn test_gouraud_shader() {
         let shader = super::shader();
 
         let color0 = Vector3::new(1.0, 0.0, 0.0);

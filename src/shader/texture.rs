@@ -30,3 +30,26 @@ macro_rules! fn_impl {
         }
     }
 }
+
+macro_rules! specific_fn_impl {
+    ($type_name : ty, $float_type: ty, $args_type : ty) => {
+        impl FnOnce<$args_type> for $type_name {
+            type Output = Vector3<$float_type>;
+            extern "rust-call" fn call_once(self, args: $args_type) -> Self::Output {
+                self.apply(args)
+            }
+        }
+        
+        impl FnMut<$args_type> for $type_name {
+            extern "rust-call" fn call_mut(&mut self, args: $args_type) -> Self::Output {
+                self.apply(args)
+            }
+        }
+        
+        impl Fn<$args_type> for $type_name {
+            extern "rust-call" fn call(&self, args: $args_type) -> Self::Output {
+                self.apply(args)
+            }
+        }
+    }
+}
