@@ -73,8 +73,8 @@ pub fn world_to_camera_matrix<N>(eye: Vector3<N>, gaze: Vector3<N>, top: Vector3
                                  w.x, w.y, w.z, _0,
                                   _0,  _0,  _0, _1);
 
-        let m_trans = Matrix4::new(_0, _0, _0, -eye.x,
-                                   _0, _0, _0, -eye.y,
+        let m_trans = Matrix4::new(_1, _0, _0, -eye.x,
+                                   _0, _1, _0, -eye.y,
                                    _0, _0, _1, -eye.z,
                                    _0, _0, _0,     _1);
 
@@ -407,9 +407,6 @@ pub fn compute_area<N>(v0: &Point3<N>,
 #[cfg(test)]
 mod tests {
     use nalgebra::{Vector3, Point3, Point4, Matrix4};
-    use approx::ApproxEq;
-    #[macro_use]
-    use approx;
 
 
     #[test]
@@ -528,10 +525,10 @@ mod tests {
         let m_rot   = super::rotation_matrix(gaze, top);
         let m_wtoc  = super::world_to_camera_matrix(eye, gaze, top);
 
-        println!("{}\n", m_trans);
-        println!("{}\n", m_rot);
-        println!("{}\n", (m_rot * m_trans));
-        println!("Result from world to camera:");
+        println!("translation matrix:\n{}\n", m_trans);
+        println!("rotation matrix:\n{}\n", m_rot);
+        println!("rotation * translation:\n{}\n", (m_rot * m_trans));
+        println!("Result from world to camera:\n");
         println!("{}\n", m_wtoc);        
 
         assert_relative_eq!(m_wtoc, m_rot * m_trans);
@@ -543,6 +540,7 @@ mod tests {
         let eye   = Vector3::new(45.0, 32.5, -19.0);
         let gaze  = Vector3::new(-3.6, -4.0, 5.0);
         let top   = Vector3::new(0.0, 0.0, 1.0);
+        
         let w     = -gaze / gaze.norm();
         let t_cross_w = top.cross(&w);
         let u = t_cross_w / t_cross_w.norm();
@@ -562,7 +560,7 @@ mod tests {
         let m_wtoc = super::world_to_camera_matrix(eye, gaze, top);
 
         assert_relative_eq!(m_wtoc, m);
-        assert_relative_eq!(m_wtoc * p_xyz, &(m * p_xyz));
+        assert_relative_eq!(m_wtoc * p_xyz, m * p_xyz);
     }
 
     #[test]

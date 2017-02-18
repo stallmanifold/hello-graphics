@@ -30,7 +30,6 @@ mod tests {
     use nalgebra::{Vector3, Point3};
     use num_traits::Float;
     use alga::general::Real;
-    use approx::ApproxEq;
 
     /// 
     /// Compute the gouraud shading of a triangle primitive.
