@@ -1,9 +1,12 @@
-use nalgebra::BaseFloat;
+use nalgebra::core::Scalar;
+use nalgebra;
+use alga::general::Real;
 use std::ops;
+use num_traits::Float;
 
 
 /// Return an initialized heap-allocated z-buffer.
-pub fn z_buffer<N: Copy + BaseFloat>(width: usize, height: usize) -> Box<ZBuffer<N>> {
+pub fn z_buffer<N: Float + Real>(width: usize, height: usize) -> Box<ZBuffer<N>> {
     let mut z_buffer = Box::new(ZBuffer::new(width, height));
     z_buffer.initialize();
 
@@ -18,7 +21,7 @@ pub struct ZBuffer<N> {
     buf: Vec<Vec<N>>,
 }
 
-impl<N> ZBuffer<N> where N: BaseFloat {
+impl<N> ZBuffer<N> where N: Float + Real {
     pub fn new(width: usize, height: usize) -> ZBuffer<N> {
         let mut z_buffer = ZBuffer {
             width: width,
@@ -30,11 +33,11 @@ impl<N> ZBuffer<N> where N: BaseFloat {
             z_buffer.buf.push(Vec::with_capacity(width));
         }
 
-        let zero = N::zero();
+        let _0 = nalgebra::zero();
 
         for i in 0..z_buffer.height {
             for _ in 0..z_buffer.width {
-                z_buffer.buf[i].push(zero);
+                z_buffer.buf[i].push(_0);
             }
         }
 
@@ -85,7 +88,7 @@ impl<'a, N: 'a> Iterator for ZBufferLineIter<'a, N> {
     }
 }
 
-impl<N> ops::Index<usize> for ZBuffer<N> where N: BaseFloat {
+impl<N> ops::Index<usize> for ZBuffer<N> where N: Scalar {
     type Output = [N];
 
     fn index(&self, index: usize) -> &Self::Output {
@@ -93,7 +96,7 @@ impl<N> ops::Index<usize> for ZBuffer<N> where N: BaseFloat {
     } 
 }
 
-impl<'a, N> ops::Index<usize> for &'a ZBuffer<N> where N: BaseFloat {
+impl<'a, N> ops::Index<usize> for &'a ZBuffer<N> where N: Scalar {
     type Output = [N];
 
     fn index(&self, index: usize) -> &Self::Output {
@@ -101,7 +104,7 @@ impl<'a, N> ops::Index<usize> for &'a ZBuffer<N> where N: BaseFloat {
     } 
 }
 
-impl<N> ops::IndexMut<usize> for ZBuffer<N> where N: BaseFloat {
+impl<N> ops::IndexMut<usize> for ZBuffer<N> where N: Scalar {
     fn index_mut(&mut self, index: usize) -> &mut Self::Output {
         &mut self.buf[index]
     }

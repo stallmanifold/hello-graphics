@@ -1,4 +1,6 @@
-use nalgebra::{BaseFloat, Point3};
+use nalgebra::{Point3};
+use num_traits::Float;
+use alga::general::Real;
 use std::marker::PhantomData;
 use std::ops;
 use std::convert::AsRef;
@@ -7,11 +9,11 @@ use std::convert::AsRef;
 type VertexIdx = usize;
 type Vertex<N> = Point3<N>;
 
-struct VertexMap<N> where N: BaseFloat {
+struct VertexMap<N> where N: Float + Real {
     data: Box<Vec<Vertex<N>>>,
 }
 
-impl<N> VertexMap<N> where N: BaseFloat {
+impl<N> VertexMap<N> where N: Float + Real {
     fn with_capacity(n_verts: usize) -> VertexMap<N> {
         let data = Box::new(Vec::with_capacity(n_verts));
         VertexMap {
@@ -46,7 +48,7 @@ impl<N> VertexMap<N> where N: BaseFloat {
     }
 }
 
-impl<N> ops::Index<VertexIdx> for VertexMap<N> where N: BaseFloat {
+impl<N> ops::Index<VertexIdx> for VertexMap<N> where N: Float + Real {
     type Output = Vertex<N>;
 
     fn index(&self, _index: VertexIdx) -> &Self::Output {
@@ -54,7 +56,7 @@ impl<N> ops::Index<VertexIdx> for VertexMap<N> where N: BaseFloat {
     }
 }
 
-impl<N> AsRef<[Vertex<N>]> for VertexMap<N> where N: BaseFloat {
+impl<N> AsRef<[Vertex<N>]> for VertexMap<N> where N: Float + Real {
     fn as_ref(&self) -> &[Vertex<N>] {
         self.data.as_ref()
     }
@@ -76,7 +78,7 @@ impl<N> Face<N> {
     }
 }
 
-impl<N> ops::Index<usize> for Face<N> where N: BaseFloat {
+impl<N> ops::Index<usize> for Face<N> where N: Float + Real {
     type Output = usize;
 
     fn index(&self, _index: usize) -> &Self::Output {
@@ -98,7 +100,7 @@ struct FaceMap<N> {
     _phantom: PhantomData<N>,
 }
 
-impl<N> FaceMap<N> where N: BaseFloat {
+impl<N> FaceMap<N> where N: Float + Real {
     fn with_capacity(n_faces: usize) -> FaceMap<N> {
         let data = Box::new(Vec::with_capacity(n_faces));
         FaceMap {
@@ -152,12 +154,12 @@ impl<N> AsRef<[Face<N>]> for FaceMap<N> {
 /// changing much, we would have to switch to something like a wing-edge
 /// graph to represent the edges and faces of the simplices to make them
 /// easy to manipulate dynamically, i.e. creating and deleting lots of triangles.
-struct Mesh<N> where N: BaseFloat {
+struct Mesh<N> where N: Float + Real {
     vertex_table: VertexMap<N>,
     face_table: FaceMap<N>,
 }
 
-impl<N> Mesh<N> where N: BaseFloat {
+impl<N> Mesh<N> where N: Float + Real {
     /// Create a mesh with at most `n_verts` vertices, and `n_faces` faces.
     fn with_dims(n_verts: usize, n_faces: usize) -> Mesh<N> {
         Mesh {

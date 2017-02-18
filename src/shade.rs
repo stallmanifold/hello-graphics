@@ -1,5 +1,6 @@
 use nalgebra::{Vector2, Vector3, Point3};
-use nalgebra::{BaseFloat};
+use alga::general::Real;
+use num_traits::Float;
 use color::Rgb;
 
 
@@ -10,7 +11,7 @@ pub fn gouraud<N>(color0: Vector3<N>,
                   color1: Vector3<N>, 
                   color2: Vector3<N>, 
                   bary:   Point3<N>) -> Vector3<N>
-    where N: BaseFloat
+    where N: Float + Real
 {
     color0 * bary[0] + color1 * bary[1] + color2 * bary[2]
 }
@@ -58,7 +59,7 @@ pub fn color_rgb(color: Vector3<f32>) -> Rgb {
 #[inline(always)]
 pub fn perspective_correct<N>(position: Point3<N>, 
                               vertex: Vector3<N>) -> Vector3<N> 
-    where N: BaseFloat
+    where N: Float + Real
 {
     Vector3::new(vertex.x / position.z, vertex.y / position.z, vertex.z)
 }
@@ -69,7 +70,7 @@ pub fn perspective_correct<N>(position: Point3<N>,
 #[inline(always)]
 pub fn perspective_correct_inplace<N>(position: Point3<N>, 
                                       vertex: &mut Vector3<N>) 
-    where N: BaseFloat
+    where N: Float + Real
 {
     vertex.x /= position.z;
     vertex.y /= position.z;

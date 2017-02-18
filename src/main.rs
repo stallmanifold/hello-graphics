@@ -3,6 +3,9 @@
 #![crate_name="graphics"]
 extern crate nalgebra;
 extern crate num_traits;
+extern crate alga;
+#[macro_use]
+extern crate approx;
 
 mod raster;
 mod z_buffer;
@@ -14,7 +17,7 @@ mod color;
 mod ppm;
 mod shader;
 
-use nalgebra::{Vector2, Vector3, Point3, FromHomogeneous, ToHomogeneous};
+use nalgebra::{Vector2, Vector3, Point3};
 use z_buffer::ZBuffer;
 use color::Rgb;
 use std::fs::File;
@@ -68,9 +71,9 @@ fn main() {
     let v1_vp = m_total * v1.to_homogeneous();
     let v2_vp = m_total * v2.to_homogeneous();
 
-    let v0: Point3<f32> = FromHomogeneous::from(&v0_vp);
-    let v1: Point3<f32> = FromHomogeneous::from(&v1_vp);
-    let v2: Point3<f32> = FromHomogeneous::from(&v2_vp);
+    let v0: Point3<f32> = Point3::from_homogeneous(v0_vp).unwrap();
+    let v1: Point3<f32> = Point3::from_homogeneous(v1_vp).unwrap();
+    let v2: Point3<f32> = Point3::from_homogeneous(v2_vp).unwrap();
     // Perspective correction
     let c0_pc = shade::perspective_correct(v0, c0);
     let c1_pc = shade::perspective_correct(v1, c1);

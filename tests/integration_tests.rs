@@ -7,7 +7,7 @@ use graphics::frame_buffer;
 use graphics::z_buffer;
 use graphics::z_buffer::ZBuffer;
 use graphics::raster;
-use nalgebra::{Vector3, Point3, Matrix4, ToHomogeneous, FromHomogeneous};
+use nalgebra::{Vector3, Point3, Matrix4};
 
 
 // This test runs through the rendering of one triangle primitive from its placement in
@@ -56,9 +56,9 @@ fn test_z_buffer_should_not_affect_rendering_with_one_primitive() {
     let v1_vp = m_total * (v1.to_homogeneous());
     let v2_vp = m_total * (v2.to_homogeneous());
 
-    let v0_rast: Point3<f32> = FromHomogeneous::from(&v0_vp);
-    let v1_rast: Point3<f32> = FromHomogeneous::from(&v1_vp);
-    let v2_rast: Point3<f32> = FromHomogeneous::from(&v2_vp);
+    let v0_rast: Point3<f32> = Point3::from_homogeneous(v0_vp).unwrap();
+    let v1_rast: Point3<f32> = Point3::from_homogeneous(v1_vp).unwrap();
+    let v2_rast: Point3<f32> = Point3::from_homogeneous(v2_vp).unwrap();
 
     let area: f32 = raster::compute_area(&v0, &v1, &v2);
 

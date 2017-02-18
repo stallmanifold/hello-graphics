@@ -1,10 +1,13 @@
 #![allow(dead_code)]
+use nalgebra;
 use nalgebra::{Vector3, Point3, Matrix4};
-use nalgebra::{Cross, Norm, BaseFloat, Inverse};
+use num_traits::Float;
+use alga::general::Real;
+//use nalgebra::{Cross, Norm, BaseFloat, Inverse};
 use util;
 
 
-/// TODO: Check divisions for _0s in matrix code.
+/// TODO: Check divisions for 0's in matrix code.
 /// TODO: Convert all raster functions to homogeneous 4D coordinates.
 /// TODO: Make interface to raster functions consistent (with pointers to data types instead of copying them.)
 
@@ -12,7 +15,7 @@ use util;
 /// Generate the world transformation from the given camera data.
 ///
 pub fn camera_to_world_matrix<N>(eye: Vector3<N>, gaze: Vector3<N>, top: Vector3<N>) -> Matrix4<N>
-    where N: BaseFloat
+    where N: Float + Real
 {
     // The vectors are all cast into homogeneous coordinates here. Points are affected
     // by translation, so `eye` has a `1` in its fourth comp_1nt, while vectors are
@@ -44,7 +47,7 @@ pub fn camera_to_world_matrix<N>(eye: Vector3<N>, gaze: Vector3<N>, top: Vector3
 
     // Transformations in graphics tend to be 4x4 so we can take advantage 
     // of homogeneous coordinates. This converts translations from affine transformations
-    // to linear _1s in _1 greater dimension.
+    // to linear 1's in 1 greater dimension.
     Matrix4::new(m11, m21, m31, m41,
                  m12, m22, m32, m42,
                  m13, m23, m33, m43,
@@ -55,9 +58,27 @@ pub fn camera_to_world_matrix<N>(eye: Vector3<N>, gaze: Vector3<N>, top: Vector3
 /// Generates the world to camera matrix.
 ///
 pub fn world_to_camera_matrix<N>(eye: Vector3<N>, gaze: Vector3<N>, top: Vector3<N>) -> Matrix4<N>
-    where N: BaseFloat
+    where N: Float + Real
 {
-    camera_to_world_matrix(eye, gaze, top).inverse().unwrap()
+        let _0 = N::zero();
+        let _1 = N::one();
+
+        let w = -gaze / gaze.norm();
+        let t_cross_w = top.cross(&w);
+        let u = t_cross_w / t_cross_w.norm();
+        let v = w.cross(&u);
+
+        let m_rot = Matrix4::new(u.x, u.y, u.z, _0,
+                                 v.x, v.y, v.z, _0,
+                                 w.x, w.y, w.z, _0,
+                                  _0,  _0,  _0, _1);
+
+        let m_trans = Matrix4::new(_0, _0, _0, -eye.x,
+                                   _0, _0, _0, -eye.y,
+                                   _0, _0, _1, -eye.z,
+                                   _0, _0, _0,     _1);
+
+        m_rot * m_trans
 }
 
 ///
@@ -65,7 +86,7 @@ pub fn world_to_camera_matrix<N>(eye: Vector3<N>, gaze: Vector3<N>, top: Vector3
 /// transformations. This is for looking down the negative z-axis.
 ///
 pub fn perspective_matrix<N>(near: N, far: N) -> Matrix4<N>
-    where N: BaseFloat 
+    where N: Float + Real
 {
     assert!(near > far);
 
@@ -99,7 +120,7 @@ pub fn perspective_matrix<N>(near: N, far: N) -> Matrix4<N>
 /// Constructs a translation matrix from a three-dimensional vector. 
 ///
 pub fn translation_matrix<N>(eye: Vector3<N>) -> Matrix4<N>
-    where N: BaseFloat
+    where N: Float + Real
 {
     let _0 = N::zero();
     let _1 = N::one();
@@ -131,7 +152,7 @@ pub fn translation_matrix<N>(eye: Vector3<N>) -> Matrix4<N>
 /// Constructs a rotation matrix from a set of coordinate axes.
 ///
 pub fn rotation_matrix<N>(gaze: Vector3<N>, top: Vector3<N>) -> Matrix4<N>
-    where N: BaseFloat
+    where N: Float + Real
 {
     let _0 = N::zero();
     let _1  = N::one();
@@ -175,25 +196,25 @@ pub fn orthographic_matrix<N>(left: N,
                               bottom: N, 
                               near: N, 
                               far: N) -> Matrix4<N> 
-    where N: BaseFloat
+    where N: Float + Real
 {
     assert!(near > far);
 
     let _0 = N::zero();
     let _1  = N::one();
-    let two  = _1 + _1;
+    let _2  = _1 + _1;
 
-    let m11 = two / (right - left);
+    let m11 = _2 / (right - left);
     let m21 = _0;
     let m31 = _0;
     let m41 = -(right + left) / (right - left);
     let m12 = _0;
-    let m22 = two / (top - bottom);
+    let m22 = _2 / (top - bottom);
     let m32 = _0;
     let m42 = -(top + bottom) / (top - bottom);
     let m13 = _0;
     let m23 = _0;
-    let m33 = two / (near - far);
+    let m33 = _2 / (near - far);
     let m43 = -((near + far) / (near - far));
     let m14 = _0;
     let m24 = _0;
@@ -216,24 +237,24 @@ pub fn perspective_projection_matrix<N>(left: N,
                                         bottom: N, 
                                         near: N, 
                                         far: N) -> Matrix4<N> 
-    where N: BaseFloat
+    where N: Float + Real
 {
     let _0 = N::zero();
     let _1 = N::one();
-    let two = _1 + _1;
+    let _2 = _1 + _1;
 
-    let m11 = (two * near) / (right - left);
+    let m11 = (_2 * near) / (right - left);
     let m21 = _0;
     let m31 = (left + right) / (left - right);
     let m41 = _0;
     let m12 = _0;
-    let m22 = (two * near) / (top - bottom);
+    let m22 = (_2 * near) / (top - bottom);
     let m32 = (bottom + top) / (bottom - top);
     let m42 = _0;
     let m13 = _0;
     let m23 = _0;
     let m33 = (far + near) / (near - far);
-    let m43 = (two * far * near) / (far - near);
+    let m43 = (_2 * far * near) / (far - near);
     let m14 = _0;
     let m24 = _0;
     let m34 = _1;
@@ -256,13 +277,12 @@ pub fn perspective_projection_matrix<N>(left: N,
 /// y-direction, i.e. (n_x, n_y) is the resolution of the screen. A pixel is _1 unit
 /// wide in this coordinate system.
 ///
-use std::fmt;
 pub fn viewport_matrix<N>(num_x: usize, num_y: usize) -> Matrix4<N>
-    where N: BaseFloat + fmt::Debug
+    where N: Float + Real
 {
     let _0 = N::zero();
     let _1  = N::one();
-    let two  = _1 + _1;
+    let _2  = _1 + _1;
 
     // Approximate num_x using type N.
     let mut image_width = _0;
@@ -276,14 +296,14 @@ pub fn viewport_matrix<N>(num_x: usize, num_y: usize) -> Matrix4<N>
         image_height += _1;
     }
 
-    let m11 = image_width / two;
+    let m11 = image_width / _2;
     let m21 = _0;
     let m31 = _0;
-    let m41 = (image_width - _1) / two;
+    let m41 = (image_width - _1) / _2;
     let m12 = _0;
-    let m22 = image_height / two;
+    let m22 = image_height / _2;
     let m32 = _0;
-    let m42 = (image_height - _1) / two;
+    let m42 = (image_height - _1) / _2;
     let m13 = _0;
     let m23 = _0;
     let m33 = _1;
@@ -308,7 +328,7 @@ pub fn world_to_raster_matrix<N>(left: N,
                                  far: N, 
                                  image_width: usize, 
                                  image_height: usize) -> Matrix4<N> 
-    where N: BaseFloat + fmt::Debug
+    where N: Float + Real
 {
     let pp_matrix: Matrix4<N> = perspective_projection_matrix(left, right, top, bottom, near, far);
     let vp_matrix: Matrix4<N> = viewport_matrix(image_width, image_height);
@@ -329,12 +349,12 @@ pub struct BoundingBox<N> {
 pub fn bounding_box<N>(p1: &Point3<N>,
                        p2: &Point3<N>,
                        p3: &Point3<N>) -> BoundingBox<N>
-    where N: BaseFloat
+    where N: Float + Real
 {
-    let x_min = util::min3(p1.x, p2.x, p3.x).floor();
-    let x_max = util::max3(p1.x, p2.x, p3.x).ceil();
-    let y_min = util::min3(p1.y, p2.y, p3.y).floor();
-    let y_max = util::max3(p1.y, p2.y, p3.y).ceil();
+    let x_min = Real::floor(util::min3(p1.x, p2.x, p3.x));
+    let x_max = Real::ceil(util::max3(p1.x, p2.x, p3.x));
+    let y_min = Real::floor(util::min3(p1.y, p2.y, p3.y));
+    let y_max = Real::ceil(util::max3(p1.y, p2.y, p3.y));
 
     BoundingBox {
         x_min: x_min,
@@ -351,7 +371,7 @@ pub fn bounding_box<N>(p1: &Point3<N>,
 pub fn compute_edge<N>(v1: &Point3<N>, 
                        v2: &Point3<N>,
                         p: &Point3<N>) -> N
-    where N: BaseFloat
+    where N: Float + Real
 {
     (p.x - v1.x)*(v2.y - v1.y) - (p.y - v1.y)*(v2.x - v1.x)
 }
@@ -364,7 +384,7 @@ pub fn barycentric_coords<N>(v0: &Point3<N>,
                              v1: &Point3<N>,
                              v2: &Point3<N>,
                               p: &Point3<N>) -> Point3<N>
-    where N: BaseFloat
+    where N: Float + Real
 {
     let w0 = compute_edge(v1, v2, p);
     let w1 = compute_edge(v2, v0, p);
@@ -379,21 +399,17 @@ pub fn barycentric_coords<N>(v0: &Point3<N>,
 pub fn compute_area<N>(v0: &Point3<N>,
                        v1: &Point3<N>,
                        v2: &Point3<N>,) -> N
-    where N: BaseFloat
+    where N: Float + Real
 {
-    compute_edge(v0, v1, v2).abs()
+    nalgebra::abs(&compute_edge(v0, v1, v2))
 }
 
 #[cfg(test)]
 mod tests {
-    use nalgebra::{Vector3, 
-                   Point3,
-                   Point4,
-                   Matrix4,
-                   ApproxEq, 
-                   ToHomogeneous,
-                   Cross,
-                   Norm};
+    use nalgebra::{Vector3, Point3, Point4, Matrix4};
+    use approx::ApproxEq;
+    #[macro_use]
+    use approx;
 
 
     #[test]
@@ -431,7 +447,7 @@ mod tests {
         println!("\n");
         println!("m_orth * m_persp = {:?}", m_persp * m_orth);
 
-        assert!(m_persp_proj.approx_eq(&(m_orth * m_persp)));
+        assert_relative_eq!(m_persp_proj, m_orth * m_persp);
     }
 
     #[test]
@@ -443,7 +459,7 @@ mod tests {
         let point2_h = m_trans * point_h;
         let point2   = (point + trans).to_homogeneous();
 
-        assert!(point2_h.approx_eq(&point2));
+        assert_relative_eq!(point2_h, point2);
     }
 
     #[test]
@@ -454,7 +470,7 @@ mod tests {
 
         println!("{}", m_trans * point);
 
-        assert!(point.approx_eq(&(m_trans * point)));
+        assert_relative_eq!(point, m_trans * point);
     }
 
     #[test]
@@ -465,14 +481,14 @@ mod tests {
 
         println!("{}", m_trans * point);
 
-        assert!(point.approx_eq(&(m_trans * point)));
+        assert_relative_eq!(point, m_trans * point);
 
         let identity = Matrix4::new(1.0, 0.0, 0.0, 0.0,
                                     0.0, 1.0, 0.0, 0.0,
                                     0.0, 0.0, 1.0, 0.0,
                                     0.0, 0.0, 0.0, 1.0);
 
-        assert!(identity.approx_eq(&(m_trans)));
+        assert_relative_eq!(identity, m_trans);
     }
 
     #[test]
@@ -497,7 +513,7 @@ mod tests {
         let vp = super::viewport_matrix::<f32>(width, height);
         let ppm = super::perspective_projection_matrix(left, right, top, bottom, near, far);
 
-        assert!(world_to_raster.approx_eq(&(vp * ppm)));
+        assert_relative_eq!(world_to_raster, vp * ppm);
     }
     
     #[test]
@@ -518,9 +534,7 @@ mod tests {
         println!("Result from world to camera:");
         println!("{}\n", m_wtoc);        
 
-        // TODO: Benchmark this.
-
-        assert!(m_wtoc.approx_eq(&(m_rot * m_trans)));
+        assert_relative_eq!(m_wtoc, m_rot * m_trans);
     }
 
     #[test]
@@ -547,8 +561,8 @@ mod tests {
         let m = m_rot * m_trans;
         let m_wtoc = super::world_to_camera_matrix(eye, gaze, top);
 
-        assert!(m_wtoc.approx_eq(&m));
-        assert!((m_wtoc * p_xyz).approx_eq(&(m * p_xyz)));
+        assert_relative_eq!(m_wtoc, m);
+        assert_relative_eq!(m_wtoc * p_xyz, &(m * p_xyz));
     }
 
     #[test]

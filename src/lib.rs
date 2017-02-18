@@ -3,6 +3,9 @@
 #![crate_name="graphics"]
 extern crate nalgebra;
 extern crate num_traits;
+extern crate alga;
+#[macro_use]
+extern crate approx;
 
 pub mod raster;
 pub mod z_buffer;

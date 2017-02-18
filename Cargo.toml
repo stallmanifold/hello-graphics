@@ -4,6 +4,8 @@ version = "0.1.0"
 authors = ["Stallmanifold <stallmanifold@gmail.com>"]
 
 [dependencies]
-nalgebra = "0.10.1"
+nalgebra = "0.11"
+alga = "0.5"
+approx = "0.1.1"
 num = "0.1.36"
 num-traits = "0.1.36"
