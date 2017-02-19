@@ -13,7 +13,6 @@ mod z_buffer;
 mod frame_buffer;
 mod util;
 mod mesh;
-mod shade;
 mod color;
 mod ppm;
 mod shader;
@@ -79,9 +78,9 @@ fn main() {
     let v1: Point3<f32> = Point3::from_homogeneous(v1_vp).unwrap();
     let v2: Point3<f32> = Point3::from_homogeneous(v2_vp).unwrap();
     // Perspective correction
-    let c0_pc = shade::perspective_correct(v0, c0);
-    let c1_pc = shade::perspective_correct(v1, c1);
-    let c2_pc = shade::perspective_correct(v2, c2);
+    let c0_pc = vertex::perspective_correct(v0, c0);
+    let c1_pc = vertex::perspective_correct(v1, c1);
+    let c2_pc = vertex::perspective_correct(v2, c2);
 
     let area: f32 = raster::compute_area(&v0, &v1, &v2);
     let one_over_z0 = 1.0 / v0.z;

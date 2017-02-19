@@ -13,6 +13,6 @@ pub mod raster;
 pub mod z_buffer;
 pub mod frame_buffer;
 mod util;
-pub mod shade;
+pub mod shader;
 pub mod color;
 mod ppm;
