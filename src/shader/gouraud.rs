@@ -30,8 +30,7 @@ impl<N> TextureMap<N, Args<N>> for GouraudShader<N> where N: Float + Real {
     /// 
     /// Compute the Gouraud shading of a triangle primitive.
     ///
-    fn apply(&self, args: Args<N>) -> Vector3<N> 
-    {
+    fn apply(&self, args: Args<N>) -> Vector3<N> {
         args.0 * (args.3)[0] + args.1 * (args.3)[1] + args.2 * (args.3)[2]
     }
 }
