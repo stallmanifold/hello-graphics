@@ -103,6 +103,12 @@ impl From<(u8, u8, u8)> for Rgb {
     }
 }
 
+impl Default for Rgb {
+    fn default() -> Rgb {
+        Rgb::from_channels(0x00, 0x00, 0x00)
+    }
+}
+
 impl fmt::Display for Rgb {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "0x{:X}{:X}{:X}", self.data[0], self.data[1], self.data[2])
