@@ -6,6 +6,9 @@ use alga::general::Real;
 use std::marker::PhantomData;
 
 
+///
+/// Convenience function for creating a new `CheckerboardShader`.
+///
 pub fn shader<N: Float + Real>(n_squares: usize) -> CheckerboardShader<N> {
     CheckerboardShader::new(n_squares)
 }
@@ -36,6 +39,9 @@ type Args<N> = (Vector2<N>,
 macro_rules! checkerboard_impl {
     ($type_name : ty) => {
         impl TextureMap<$type_name, Args<$type_name>> for CheckerboardShader<$type_name> {
+            /// 
+            /// Compute the checkerboard shading of a triangle primitive.
+            ///
             fn apply(&self, args: Args<$type_name>) -> Vector3<$type_name> {
                 let z  = 1.0 / ((args.6)[0]*(args.3)[2] + (args.6)[1]*(args.4)[2] + (args.6)[2]*(args.5)[2]);
 

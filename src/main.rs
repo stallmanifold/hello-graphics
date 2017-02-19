@@ -17,6 +17,7 @@ mod shade;
 mod color;
 mod ppm;
 mod shader;
+mod vertex;
 
 use nalgebra::{Vector2, Vector3, Point3};
 use z_buffer::ZBuffer;
@@ -111,7 +112,7 @@ fn main() {
                 let st1 = Vector2::new(0.0, 1.0);
                 let st2 = Vector2::new(1.0, 0.0);
                 let color = shader(st0, st1, st2, v0, v1, v2, w);
-                let rgb = shade::color_rgb(color);
+                let rgb = color::rgb(color);
                 frame_buffer[i][j] = rgb;
             } else {
                 // Use a background color.

@@ -2,7 +2,7 @@ extern crate nalgebra;
 extern crate graphics;
 
 use graphics::color::Rgb;
-use graphics::shade;
+use graphics::vertex;
 use graphics::frame_buffer;
 use graphics::z_buffer;
 use graphics::z_buffer::ZBuffer;

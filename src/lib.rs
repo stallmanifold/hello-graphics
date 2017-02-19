@@ -8,6 +8,7 @@ extern crate alga;
 #[macro_use]
 extern crate approx;
 
+pub mod vertex;
 pub mod raster;
 pub mod z_buffer;
 pub mod frame_buffer;
