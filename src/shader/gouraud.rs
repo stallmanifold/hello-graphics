@@ -2,21 +2,31 @@ use shader::texture::TextureMap;
 use nalgebra::{Vector3, Point3};
 use num_traits::Float;
 use alga::general::Real;
+use std::marker::PhantomData;
 
 
-pub fn shader() -> GouraudShader {
-    GouraudShader::Proc
+///
+/// Convenience function for creating a new `GouraudShader`.
+///
+pub fn shader<N: Float + Real>() -> GouraudShader<N> {
+    GouraudShader::new()
 }
 
-pub enum GouraudShader { 
-    Proc,
+pub struct GouraudShader<N> { 
+    _phantom: PhantomData<N>,
+}
+
+impl<N> GouraudShader<N> where N: Float + Real {
+    fn new() -> GouraudShader<N> {
+        GouraudShader {
+            _phantom: PhantomData,
+        }
+    }
 }
 
 type Args<N> = (Vector3<N>, Vector3<N>, Vector3<N>, Point3<N>);
 
-impl<N> TextureMap<N, Args<N>> for GouraudShader
-    where N: Float + Real 
-{
+impl<N> TextureMap<N, Args<N>> for GouraudShader<N> where N: Float + Real {
     /// 
     /// Compute the Gouraud shading of a triangle primitive.
     ///
@@ -26,7 +36,7 @@ impl<N> TextureMap<N, Args<N>> for GouraudShader
     }
 }
 
-fn_impl!(GouraudShader, N, Args<N>);
+fn_impl!(GouraudShader<N>, N, Args<N>);
 
 
 #[cfg(test)]
