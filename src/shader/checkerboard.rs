@@ -55,7 +55,7 @@ macro_rules! checkerboard_impl {
 checkerboard_impl!(f32);
 checkerboard_impl!(f64);
 
-// TODO: Clean up this texture code.
+// TODO: Clean up this generic texture code.
 /*
 impl<N> TextureMap<N, Args<N>> for CheckerboardShader
     where N: Float + Real + From<u16>

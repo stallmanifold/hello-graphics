@@ -1,6 +1,23 @@
 use std::ops;
 use std::convert::From;
 use std::fmt;
+use num_traits::Float;
+use alga::general::Real;
+use nalgebra::Vector3;
+use std::fmt::Debug;
+
+
+///
+/// Calculate the RGB color of a color vector.
+///
+#[inline(always)]
+pub fn rgb(color: Vector3<f32>) -> Rgb {
+    let r: u8 = Real::trunc(255.0 * color.x) as u8;
+    let g: u8 = Real::trunc(255.0 * color.y) as u8;
+    let b: u8 = Real::trunc(255.0 * color.z) as u8;
+
+    Rgb::from_channels(r, g, b)
+}
 
 
 #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
@@ -73,6 +90,15 @@ impl<'a> From<&'a [u8; 3]> for Rgb {
     fn from(arr: &[u8; 3]) -> Rgb {
         Rgb {
             data: arr.clone()
+        }
+    }
+}
+
+impl From<(u8, u8, u8)> for Rgb {
+    #[inline(always)]
+    fn from(tuple: (u8, u8, u8)) -> Rgb {
+        Rgb {
+            data: [tuple.0, tuple.1, tuple.2]
         }
     }
 }

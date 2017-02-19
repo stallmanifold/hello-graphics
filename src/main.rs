@@ -23,6 +23,8 @@ use z_buffer::ZBuffer;
 use color::Rgb;
 use std::fs::File;
 use ppm::NetPBMEncoder;
+use shader::gouraud;
+use shader::checkerboard;
 
 
 fn make_buffer(size: usize) -> Box<Vec<u8>> {
@@ -85,10 +87,14 @@ fn main() {
     let one_over_z1 = 1.0 / v1.z;
     let one_over_z2 = 1.0 / v2.z;
 
+    let shader = checkerboard::shader::<f32>(5);
+    //let shader = gouraud::shader::<f32>();
+
     // Initialize the z buffer and frame buffer.
     let mut z_buffer: Box<ZBuffer<f32>> = z_buffer::z_buffer(width, height);
     let mut frame_buffer = frame_buffer::frame_buffer(width, height);
 
+    // Graphite color.
     let default_rgb = Rgb::from_channels(0x3B, 0x44, 0x4B);
 
     // Render the current scene.
@@ -104,7 +110,7 @@ fn main() {
                 let st0 = Vector2::new(0.0, 0.0);
                 let st1 = Vector2::new(0.0, 1.0);
                 let st2 = Vector2::new(1.0, 0.0);
-                let color = shade::checkerboard(st0, st1, st2, v0, v1, v2, w);
+                let color = shader(st0, st1, st2, v0, v1, v2, w);
                 let rgb = shade::color_rgb(color);
                 frame_buffer[i][j] = rgb;
             } else {
