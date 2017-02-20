@@ -17,6 +17,7 @@ mod color;
 mod ppm;
 mod shader;
 mod vertex;
+mod camera;
 
 use nalgebra::{Vector2, Vector3, Point3};
 use z_buffer::ZBuffer;
@@ -57,16 +58,19 @@ fn main() {
 
     let width: usize = 512;
     let height: usize = 512;
-    // perspective matrix parameters.
-    let l = -40.0; 
-    let r = 40.0;
-    let t = 40.0;
-    let b = -40.0;
-    let n = -5.0;
-    let f = -20.0;
+
+    // Camera model parameters.
+    let focal_length = 5.0;
+    let aperture_width = 80.0;
+    let aperture_height = 80.0;
+
+    let near = -5.0;
+    let far = -20.0;
+
+    let camera_gen = camera::from_specification(focal_length, aperture_width, aperture_height);
 
     let m_cam = raster::world_to_camera_matrix::<f32>(eye, gaze, top);
-    let m_per = raster::perspective_projection_matrix::<f32>(l, r, t, b, n, f);
+    let m_per = camera_gen(near, far);
     let m_vp  = raster::viewport_matrix::<f32>(width, height);
     let m_total = m_vp * m_per * m_cam;
 
@@ -97,6 +101,10 @@ fn main() {
     // Graphite color.
     let default_rgb = Rgb::from_channels(0x3B, 0x44, 0x4B);
 
+    let st0 = Vector2::new(0.0, 0.0);
+    let st1 = Vector2::new(0.0, 1.0);
+    let st2 = Vector2::new(1.0, 0.0);
+
     // Render the current scene.
     for i in 0..height {
         for j in 0..width {
@@ -106,10 +114,7 @@ fn main() {
                 w /= area;
                 // Apply perspective correction.
                 //let z = 1.0 / (w[0] * one_over_z0 + w[1] * one_over_z1 + w[2] * one_over_z2);
-                //let color = z * shade::gouraud(c0_pc, c1_pc, c2_pc, w);
-                let st0 = Vector2::new(0.0, 0.0);
-                let st1 = Vector2::new(0.0, 1.0);
-                let st2 = Vector2::new(1.0, 0.0);
+                //let color = z * shader(c0_pc, c1_pc, c2_pc, w);
                 let color = shader(st0, st1, st2, v0, v1, v2, w);
                 let rgb = color::rgb(color);
                 frame_buffer[i][j] = rgb;
