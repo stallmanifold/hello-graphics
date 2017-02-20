@@ -72,6 +72,10 @@ impl<Or: Origin> FrameBuffer<Or> {
     pub fn height(&self) -> usize {
         self.height
     }
+
+    pub fn shape(&self) -> (usize, usize) {
+        (self.width, self.height)
+    }
 }
 
 impl FrameBuffer<BottomLeft> {
@@ -206,6 +210,101 @@ impl ops::IndexMut<usize> for FrameBuffer<TopLeft> {
     }
 }
 
+impl PartialEq<FrameBuffer<TopLeft>> for FrameBuffer<BottomLeft> {
+    fn eq(&self, other: &FrameBuffer<TopLeft>) -> bool {
+        if self.shape() != other.shape() {
+            return false; 
+        }
+
+        for (top_left_row, bottom_left_row) in self.lines().zip(other.lines()) {
+            if top_left_row != bottom_left_row {
+                return false;
+            }
+        }
+
+        true
+    }
+}
+
+impl PartialEq<FrameBuffer<BottomLeft>> for FrameBuffer<TopLeft> {
+    fn eq(&self, other: &FrameBuffer<BottomLeft>) -> bool {
+        if self.shape() != other.shape() {
+            return false;
+        }
+
+        for (top_left_row, bottom_left_row) in self.lines().zip(other.lines()) {
+            if top_left_row != bottom_left_row {
+                return false;
+            }
+        }
+
+        true
+    }
+}
+
+impl<'a> PartialEq<&'a FrameBuffer<TopLeft>> for FrameBuffer<BottomLeft> {
+    fn eq(&self, other: &&'a FrameBuffer<TopLeft>) -> bool {
+        if self.shape() != other.shape() {
+            return false;
+        }
+
+        for (top_left_row, bottom_left_row) in self.lines().zip(other.lines()) {
+            if top_left_row != bottom_left_row {
+                return false;
+            }
+        }
+
+        true
+    }
+}
+
+impl<'a> PartialEq<&'a FrameBuffer<BottomLeft>> for FrameBuffer<TopLeft> {
+    fn eq(&self, other: &&'a FrameBuffer<BottomLeft>) -> bool {
+        if self.shape() != other.shape() {
+            return false;
+        }
+
+        for (top_left_row, bottom_left_row) in self.lines().zip(other.lines()) {
+            if top_left_row != bottom_left_row {
+                return false;
+            }
+        }
+
+        true
+    }
+}
+
+impl<'a> PartialEq<FrameBuffer<TopLeft>> for &'a FrameBuffer<BottomLeft> {
+    fn eq(&self, other: &FrameBuffer<TopLeft>) -> bool {
+        if self.shape() != other.shape() {
+            return false;
+        }
+
+        for (top_left_row, bottom_left_row) in self.lines().zip(other.lines()) {
+            if top_left_row != bottom_left_row {
+                return false;
+            }
+        }
+
+        true
+    }
+}
+
+impl<'a> PartialEq<FrameBuffer<BottomLeft>> for &'a FrameBuffer<TopLeft> {
+    fn eq(&self, other: &FrameBuffer<BottomLeft>) -> bool {
+        if self.shape() != other.shape() {
+            return false;
+        }
+
+        for (top_left_row, bottom_left_row) in self.lines().zip(other.lines()) {
+            if top_left_row != bottom_left_row {
+                return false;
+            }
+        }
+
+        true
+    }
+}
 
 #[cfg(test)]
 mod tests {
@@ -278,8 +377,36 @@ mod tests {
         }
 
         for line in buf.lines() {
-            // No paniccs should occur.
+            // No panics should occur.
             assert!(true);
         }
+    }
+
+    #[test]
+    fn test_topleft_frame_buffer_and_bottomright_frame_buffer_should_be_identical_up_to_ordering_of_rows() {
+        let width = 128;
+        let height = 128;
+
+        // Write a test pattern into the frame buffer that's just the 
+        // row number repeated across the line.
+        let mut top_left = super::frame_buffer(width, height);
+        for (i, line) in top_left.lines().enumerate() {
+            let new_rgb = Rgb::from_channels(i as u8, i as u8, i as u8);
+            for ref mut old_rgb in line {
+                *old_rgb = &new_rgb
+            }
+        }
+
+        let mut bottom_left = super::FrameBuffer::<super::BottomLeft>::new(width, height);
+        bottom_left.initialize();
+        for (i, line) in bottom_left.lines().enumerate() {
+            let new_rgb = Rgb::from_channels(i as u8, i as u8, i as u8);
+            for ref mut old_rgb in line {
+                *old_rgb = &new_rgb;
+            }
+        }
+
+        // TopLeft and BottomLeft type should be equal with the rows flipped.
+        assert_eq!(&*top_left, bottom_left);
     }
 }
