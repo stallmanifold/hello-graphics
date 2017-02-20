@@ -24,7 +24,6 @@ use z_buffer::ZBuffer;
 use color::Rgb;
 use std::fs::File;
 use ppm::NetPBMEncoder;
-use shader::gouraud;
 use shader::checkerboard;
 
 
@@ -65,7 +64,7 @@ fn main() {
     let aperture_height = 80.0;
 
     let near = -5.0;
-    let far = -20.0;
+    let far = -10.0;
 
     let camera_gen = camera::from_specification(focal_length, aperture_width, aperture_height);
 

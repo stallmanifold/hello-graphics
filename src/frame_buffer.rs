@@ -1,28 +1,49 @@
 use color::Rgb;
 use std::ops;
+use std::marker::PhantomData;
 
 
 /// Return an initialized heap allocated frame buffer.
-pub fn frame_buffer(width: usize, height: usize) -> Box<FrameBuffer> {
+pub fn frame_buffer(width: usize, height: usize) -> Box<FrameBuffer<TopLeft>> {
     let mut frame_buffer = Box::new(FrameBuffer::new(width, height));
     (&mut (*frame_buffer)).initialize();
 
     frame_buffer
 }
 
+///
+/// Marker trait for defining where in the buffer the origin is.
+/// We must demarcate these because if the frame buffer data is
+/// written to the frame buffer starting from the bottom left corner
+/// of the screen, but the output device assumes the data in the 
+/// buffer starts from the top left corner of the screen, the image will be
+/// drawn upside down. 
+///
+pub trait Origin {}
+
+#[derive(Copy, Clone, Eq, PartialEq, Debug)]
+pub enum TopLeft {}
+#[derive(Copy, Clone, Eq, PartialEq, Debug)]
+pub enum BottomLeft {}
+
+impl Origin for TopLeft {}
+impl Origin for BottomLeft {}
+
 #[derive(PartialEq, Eq, Debug)]
-pub struct FrameBuffer {
+pub struct FrameBuffer<Or: Origin> {
     width: usize,
     height: usize,
     buf: Vec<Vec<Rgb>>,
+    _phantom: PhantomData<Or>,
 }
 
-impl FrameBuffer {
-    pub fn new(width: usize, height: usize) -> FrameBuffer {
+impl<Or: Origin> FrameBuffer<Or> {
+    pub fn new(width: usize, height: usize) -> FrameBuffer<Or> {
         let mut frame_buffer = FrameBuffer {
             width: width,
             height: height,
-            buf: Vec::with_capacity(height)
+            buf: Vec::with_capacity(height),
+            _phantom: PhantomData,
         };
 
         for _ in 0..frame_buffer.height {
@@ -51,7 +72,9 @@ impl FrameBuffer {
     pub fn height(&self) -> usize {
         self.height
     }
+}
 
+impl FrameBuffer<BottomLeft> {
     pub fn dump_frame(&self, other_buf: &mut [u8]) -> Option<usize> {
         if other_buf.len() >= 3 * self.height * self.width {
             for i in 0..self.height {
@@ -68,33 +91,63 @@ impl FrameBuffer {
         }
     }
 
-    pub fn lines(&self) -> ScanlineIter {
-        ScanlineIter {
+    pub fn lines(&self) -> RowIter<BottomLeft> {
+        RowIter {
             index: 0,
-            lines: &self.buf
+            rows: &self.buf,
+            _phantom: PhantomData,
         }
     }
 }
 
-pub struct ScanlineIter<'a> {
-    index: usize,
-    lines: &'a [Vec<Rgb>],
+impl FrameBuffer<TopLeft> {
+    pub fn dump_frame(&self, other_buf: &mut [u8]) -> Option<usize> {
+        if other_buf.len() >= 3 * self.height * self.width {
+            for i in 0..self.height {
+                for j in 0..self.width {
+                    other_buf[3*(self.width * i + j)]   = self.buf[self.height - i + 1][j][0]; 
+                    other_buf[3*(self.width * i + j)+1] = self.buf[self.height - i + 1][j][1];
+                    other_buf[3*(self.width * i + j)+2] = self.buf[self.height - i + 1][j][2];
+                }
+            }
+
+            Some(3 * self.height * self.width)
+        } else {
+            None
+        }
+    }
+
+    pub fn lines(&self) -> RowIter<TopLeft> {
+        RowIter {
+            index: self.height,
+            rows: &self.buf,
+            _phantom: PhantomData,
+        }
+    }
 }
 
-impl<'a> Iterator for ScanlineIter<'a> {
+pub struct RowIter<'a, Or: Origin> {
+    index: usize,
+    rows: &'a [Vec<Rgb>],
+    _phantom: PhantomData<Or>,
+}
+
+// Iteration for frame buffers whose origins starts from 
+// the bottom left.
+impl<'a> Iterator for RowIter<'a, BottomLeft> {
     type Item = &'a [Rgb];
 
     fn next(&mut self) -> Option<Self::Item> {
         self.index += 1;
-        if self.index < self.lines.len() {
-            Some(&self.lines[self.index])
+        if self.index < self.rows.len() {
+            Some(&self.rows[self.index])
         } else {
             None
         }
     }
 }
 
-impl ops::Index<usize> for FrameBuffer {
+impl ops::Index<usize> for FrameBuffer<BottomLeft> {
     type Output = [Rgb];
 
     fn index(&self, index: usize) -> &Self::Output {
@@ -102,7 +155,7 @@ impl ops::Index<usize> for FrameBuffer {
     } 
 }
 
-impl<'a> ops::Index<usize> for &'a FrameBuffer {
+impl<'a> ops::Index<usize> for &'a FrameBuffer<BottomLeft> {
     type Output = [Rgb];
 
     fn index(&self, index: usize) -> &Self::Output {
@@ -110,9 +163,46 @@ impl<'a> ops::Index<usize> for &'a FrameBuffer {
     } 
 }
 
-impl ops::IndexMut<usize> for FrameBuffer {
+impl ops::IndexMut<usize> for FrameBuffer<BottomLeft> {
     fn index_mut(&mut self, index: usize) -> &mut Self::Output {
         &mut self.buf[index]
+    }
+}
+
+// Iteration for Frame Buffers whose origins start from the top
+// left corner of the screen.
+impl<'a> Iterator for RowIter<'a, TopLeft> {
+    type Item = &'a [Rgb];
+
+    fn next(&mut self) -> Option<Self::Item> {
+        self.index += 1;
+        if self.index < self.rows.len() {
+            Some(&self.rows[self.rows.len() - self.index - 1])
+        } else {
+            None
+        }
+    }
+}
+
+impl ops::Index<usize> for FrameBuffer<TopLeft> {
+    type Output = [Rgb];
+
+    fn index(&self, index: usize) -> &Self::Output {
+        &self.buf[self.height - index - 1]
+    } 
+}
+
+impl<'a> ops::Index<usize> for &'a FrameBuffer<TopLeft> {
+    type Output = [Rgb];
+
+    fn index(&self, index: usize) -> &Self::Output {
+        &self.buf[self.height - index - 1]
+    } 
+}
+
+impl ops::IndexMut<usize> for FrameBuffer<TopLeft> {
+    fn index_mut(&mut self, index: usize) -> &mut Self::Output {
+        &mut self.buf[self.height - index - 1]
     }
 }
 
@@ -171,6 +261,25 @@ mod tests {
             let rgb = Rgb::from_channels(chunk[0], chunk[1], chunk[2]);
 
             assert_eq!(rgb, color);
+        }
+    }
+
+    #[test]
+    fn test_topleft_frame_buffer_should_not_panic_during_iteration() {
+        let width  = 128;
+        let height = 128;
+        let mut buf  = super::frame_buffer(width, height);
+        let color = Rgb::from_channels(80,90,100);
+        
+        for i in 0..buf.height() {
+            for j in 0..buf.width() {
+                buf[i][j] = color;
+            }
+        }
+
+        for line in buf.lines() {
+            // No paniccs should occur.
+            assert!(true);
         }
     }
 }

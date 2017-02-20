@@ -155,10 +155,10 @@ pub fn rotation_matrix<N>(gaze: Vector3<N>, top: Vector3<N>) -> Matrix4<N>
     where N: Float + Real
 {
     let _0 = N::zero();
-    let _1  = N::one();
+    let _1 = N::one();
 
     // Compute the orientation of the world space axes in the rotated space.
-    let w = -gaze / gaze.norm();
+    let w = (-gaze) / gaze.norm();
     let t_cross_w = top.cross(&w);
     let u = t_cross_w / t_cross_w.norm();
     let v = w.cross(&u);
