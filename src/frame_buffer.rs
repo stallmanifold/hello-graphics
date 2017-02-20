@@ -105,9 +105,9 @@ impl FrameBuffer<TopLeft> {
         if other_buf.len() >= 3 * self.height * self.width {
             for i in 0..self.height {
                 for j in 0..self.width {
-                    other_buf[3*(self.width * i + j)]   = self.buf[self.height - i + 1][j][0]; 
-                    other_buf[3*(self.width * i + j)+1] = self.buf[self.height - i + 1][j][1];
-                    other_buf[3*(self.width * i + j)+2] = self.buf[self.height - i + 1][j][2];
+                    other_buf[3*(self.width * i + j)]   = self.buf[i][j][0]; 
+                    other_buf[3*(self.width * i + j)+1] = self.buf[i][j][1];
+                    other_buf[3*(self.width * i + j)+2] = self.buf[i][j][2];
                 }
             }
 
@@ -242,8 +242,8 @@ mod tests {
 
     #[test]
     fn test_dump_frame() {
-        let width  = 128;
-        let height = 128;
+        let width  = 512;
+        let height = 512;
         let mut buf  = super::frame_buffer(width, height);
         let color = Rgb::from_channels(80,90,100);
         
