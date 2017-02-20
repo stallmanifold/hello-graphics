@@ -3,7 +3,7 @@ use std::convert::From;
 use std::fmt;
 use num_traits::Float;
 use alga::general::Real;
-use nalgebra::Vector3;
+use nalgebra::{Point3, Vector3};
 use std::fmt::Debug;
 
 
@@ -101,3 +101,45 @@ impl fmt::Display for Rgb {
         write!(f, "0x{:X}{:X}{:X}", self.data[0], self.data[1], self.data[2])
     }
 }
+
+pub trait RgbCast<V> {
+    type RgbValue;
+
+    fn rgb_cast(color: V) -> Self::RgbValue;
+}
+
+
+macro_rules! rgb_cast_impl {
+    ($ident: ident, $float_type: ty, $max_value: expr) => {
+        impl RgbCast<$ident<$float_type>> for Rgb {
+            type RgbValue = Rgb;
+
+            #[inline]
+            fn rgb_cast(color: $ident<$float_type>) -> Self::RgbValue {
+                let r: u8 = Real::trunc($max_value * color.x) as u8;
+                let g: u8 = Real::trunc($max_value * color.y) as u8;
+                let b: u8 = Real::trunc($max_value * color.z) as u8;
+
+                Rgb::from_channels(r, g, b)
+            }
+        }
+
+        impl<'a> RgbCast<&'a $ident<$float_type>> for Rgb {
+            type RgbValue = Rgb;
+
+            #[inline]
+            fn rgb_cast(color: &'a $ident<$float_type>) -> Self::RgbValue {
+                let r: u8 = Real::trunc($max_value * color.x) as u8;
+                let g: u8 = Real::trunc($max_value * color.y) as u8;
+                let b: u8 = Real::trunc($max_value * color.z) as u8;
+
+                Rgb::from_channels(r, g, b)
+            }
+        }
+    }
+}
+
+rgb_cast_impl!(Vector3, f32, 255.0);
+rgb_cast_impl!(Vector3, f64, 255.0);
+rgb_cast_impl!(Point3, f32, 255.0);
+rgb_cast_impl!(Point3, f64, 255.0);
