@@ -25,6 +25,7 @@ use color::Rgb;
 use std::fs::File;
 use ppm::NetPBMEncoder;
 use shader::checkerboard;
+use camera::CameraModel;
 
 
 fn make_buffer(size: usize) -> Box<Vec<u8>> {
@@ -66,10 +67,10 @@ fn main() {
     let near = -5.0;
     let far = -10.0;
 
-    let camera_gen = camera::from_specification(focal_length, aperture_width, aperture_height);
+    let camera = CameraModel::from_spec(focal_length, aperture_width, aperture_height);
 
     let m_cam = raster::world_to_camera_matrix::<f32>(eye, gaze, top);
-    let m_per = camera_gen(near, far);
+    let m_per = camera.get_matrix(near, far);
     let m_vp  = raster::viewport_matrix::<f32>(width, height);
     let m_total = m_vp * m_per * m_cam;
 

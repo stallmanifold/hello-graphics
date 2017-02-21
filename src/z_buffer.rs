@@ -15,6 +15,7 @@ pub fn z_buffer<N: Float + Real>(width: usize, height: usize) -> Box<ZBuffer<N>>
 
 /// Use a floating point ZBuffer for right now.
 /// TODO: Convert to an integer Z-Buffer.
+#[derive(PartialEq, Eq)]
 pub struct ZBuffer<N> {
     width: usize,
     height: usize,
@@ -135,6 +136,7 @@ mod tests {
         let height = 128;
         let buf = super::z_buffer::<f32>(width, height);
         let inf: f32 = Float::infinity();
+
 
         for line in buf.lines() {
             for pixel in line {
