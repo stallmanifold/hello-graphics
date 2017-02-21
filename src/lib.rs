@@ -12,6 +12,7 @@ pub mod vertex;
 pub mod raster;
 pub mod z_buffer;
 pub mod frame_buffer;
+pub mod camera;
 mod util;
 pub mod shader;
 pub mod color;

@@ -3,6 +3,7 @@ extern crate graphics;
 
 use graphics::color::Rgb;
 use graphics::vertex;
+use graphics::camera::CameraModel;
 use graphics::frame_buffer;
 use graphics::z_buffer;
 use graphics::z_buffer::ZBuffer;
@@ -36,18 +37,21 @@ fn test_z_buffer_should_not_affect_rendering_with_one_primitive() {
 
     let width: usize = 256;
     let height: usize = 256;
+
     // These are the viewing parameters for the camera model.
-    let l = -40.0; 
-    let r = 40.0;
-    let t = 40.0;
-    let b = -40.0;
-    let n = -5.0;
-    let f = -20.0;
+    let focal_length = 5.0;
+    let aperture_width = 80.0;
+    let aperture_height = 80.0;
+
+    let near = -5.0;
+    let far = -10.0;
+
+    let camera = CameraModel::from_spec(focal_length, aperture_width, aperture_height);
 
     // Initialize the world space to camera space transformation.
     let m_cam = raster::world_to_camera_matrix::<f32>(eye, gaze, top);
     // Initialize the perspective projection matrix.
-    let m_per = raster::perspective_projection_matrix::<f32>(l, r, t, b, n, f);
+    let m_per = camera.get_matrix(near, far);
     // The viewport matrix. We index pixels from the bottom of the screen.
     let m_vp  = raster::viewport_matrix::<f32>(width, height);
     let m_total = m_vp * m_per * m_cam;
