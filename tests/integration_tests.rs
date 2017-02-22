@@ -8,7 +8,8 @@ use graphics::frame_buffer::{FrameBuffer, TopLeft};
 use graphics::z_buffer;
 use graphics::z_buffer::ZBuffer;
 use graphics::raster;
-use graphics::shader;
+use graphics::shader::monochrome;
+use graphics::shader::monochrome::MonochromeShader;
 use nalgebra::{Vector3, Point3, Matrix4};
 
 
@@ -30,7 +31,7 @@ impl MockGraphicsPipelineWithZBuffer {
         self.frame_buffer.initialize();
     }
 
-    fn run_with(&mut self, shader: MockShader, m_wtor: Matrix4<f32>, v0: Point3<f32>, v1: Point3<f32>, v2: Point3<f32>) {
+    fn run_with(&mut self, shader: &MonochromeShader<f32>, m_wtor: Matrix4<f32>, v0: Point3<f32>, v1: Point3<f32>, v2: Point3<f32>) {
         let height = self.frame_buffer.height();
         let width  = self.frame_buffer.width();
 
@@ -56,16 +57,12 @@ impl MockGraphicsPipelineWithZBuffer {
                     if z < (*self.z_buffer)[i][j] {
                         (*self.z_buffer)[i][j] = z;
                         // Write a shader value into the frame buffer.
-                        let color = shader(v0, v1, v2, w);
+                        let color = shader(w);
                         self.frame_buffer[i][j] = color::rgb(color);
                     }
                 }
             }
         }
-    }
-
-    fn run(&mut self, m_wtor: Matrix4<f32>, v0: Point3<f32>, v1: Point3<f32>, v2: Point3<f32>) {
-        self.run_with(mock_shader(), m_wtor, v0, v1, v2)
     }
 }
 
@@ -84,7 +81,7 @@ impl MockGraphicsPipelineWithoutZBuffer {
         self.frame_buffer.initialize();
     }
 
-    fn run_with(&mut self, shader: MockShader, m_wtor: Matrix4<f32>, v0: Point3<f32>, v1: Point3<f32>, v2: Point3<f32>) {
+    fn run_with(&mut self, shader: &MonochromeShader<f32>, m_wtor: Matrix4<f32>, v0: Point3<f32>, v1: Point3<f32>, v2: Point3<f32>) {
         let height = self.frame_buffer.height();
         let width  = self.frame_buffer.width();
 
@@ -106,15 +103,11 @@ impl MockGraphicsPipelineWithoutZBuffer {
                 if (w[0] >= 0.0) && (w[1] >= 0.0) && (w[2] >= 0.0) {
                     w /= area;
                     // Write a sentinel value into the frame buffer.
-                    let color = shader(v0, v1, v2, w);
+                    let color = shader(w);
                     self.frame_buffer[i][j] = color::rgb(color);
                 }
             }
         }
-    }
-
-    fn run(&mut self, m_wtor: Matrix4<f32>, v0: Point3<f32>, v1: Point3<f32>, v2: Point3<f32>) {
-        self.run_with(mock_shader(), m_wtor, v0, v1, v2)
     }
 }
 
@@ -124,15 +117,6 @@ fn make_pipeline_with_z_buffer(width: usize, height: usize) -> MockGraphicsPipel
 
 fn make_pipeline_without_z_buffer(width: usize, height: usize) -> MockGraphicsPipelineWithoutZBuffer {
     MockGraphicsPipelineWithoutZBuffer::new(width, height)
-}
-
-type MockShader = Box<Fn(Point3<f32>, Point3<f32>, Point3<f32>, Point3<f32>) -> Vector3<f32>>;
-
-#[allow(unused_variables)]
-fn mock_shader() -> MockShader {
-    Box::new(move |v0: Point3<f32>, v1: Point3<f32>, v2: Point3<f32>, w: Point3<f32>| {
-        Vector3::new(0.3, 0.3, 0.4)
-    })
 }
 
 #[derive(Copy, Clone)]
@@ -420,6 +404,7 @@ fn test_z_buffer_should_not_affect_rendering_with_one_primitive() {
     let v0: Point3<f32> = Point3::new(30.0, 30.0, 0.0);
     let v1: Point3<f32> = Point3::new(30.0, -30.0, 0.0);
     let v2: Point3<f32> = Point3::new(-30.0, -30.0, 0.0);
+    let sh_v = monochrome::shader(Vector3::new(0.0, 1.0, 0.0));
 
     let width: usize = 512;
     let height: usize = 512;
@@ -429,8 +414,8 @@ fn test_z_buffer_should_not_affect_rendering_with_one_primitive() {
     let mut pipeline_no_z = make_pipeline_without_z_buffer(width, height);
 
     // WHEN: The scene is rendered using z-buffering.
-    pipeline_z.run(m_total, v0, v1, v2);
-    pipeline_no_z.run(m_total, v0, v1, v2);
+    pipeline_z.run_with(&sh_v, m_total, v0, v1, v2);
+    pipeline_no_z.run_with(&sh_v, m_total, v0, v1, v2);
 
     // THEN: The Z-buffered pipeline should actually render something.
     let zero = frame_buffer::frame_buffer(width, height);
@@ -444,14 +429,16 @@ fn test_z_buffer_should_not_affect_rendering_with_one_primitive() {
 
 #[test]
 fn test_z_buffer_should_give_same_results_as_rendering_objects_back_to_front() {
-    // GIVEN: A scene with two triangles ordered back to front.
+    // GIVEN: A scene with two triangles of different colors ordered back to front.
     let u0: Point3<f32> = Point3::new(30.0, 30.0, 0.0);
     let u1: Point3<f32> = Point3::new(0.0, -30.0, 0.0);
     let u2: Point3<f32> = Point3::new(-30.0, 30.0, 0.0);
+    let sh_u = monochrome::shader(Vector3::new(1.0, 0.0, 0.0));
 
-    let v0: Point3<f32> = Point3::new(20.0, 20.0, 0.0);
-    let v1: Point3<f32> = Point3::new(20.0, -20.0, 0.0);
-    let v2: Point3<f32> = Point3::new(-20.0, -20.0, 0.0);
+    let v0: Point3<f32> = Point3::new(20.0, 20.0, 1.0);
+    let v1: Point3<f32> = Point3::new(20.0, -20.0, 1.0);
+    let v2: Point3<f32> = Point3::new(-20.0, -20.0, 1.0);
+    let sh_v = monochrome::shader(Vector3::new(0.0, 1.0, 0.0));
 
     let width: usize = 512;
     let height: usize = 512;
@@ -461,12 +448,16 @@ fn test_z_buffer_should_give_same_results_as_rendering_objects_back_to_front() {
     let mut pipeline_no_z = make_pipeline_without_z_buffer(width, height);
 
     // WHEN: The scene is rendered using z-buffering.
-    pipeline_z.run(m_total, v0, v1, v2);
-    pipeline_z.run(m_total, u0, u1, u2);
+    // NOTE: We are putting the scene data into the pipeline in reverse here 
+    //       to show that the Z-Buffer still renders the primitive in correct
+    //       back-to-front order.
+    pipeline_z.run_with(&sh_v, m_total, v0, v1, v2);
+    pipeline_z.run_with(&sh_u, m_total, u0, u1, u2);
 
-    // THEN: The scene should be rendered as though the triangles were rendered in back to front order without the z buffer.
-    pipeline_no_z.run(m_total, u0, u1, u2);
-    pipeline_no_z.run(m_total, v0, v1, v2);
+    // THEN: The scene should be rendered as though the triangles were rendered in 
+    //       back to front order without the z buffer.
+    pipeline_no_z.run_with(&sh_u, m_total, u0, u1, u2);
+    pipeline_no_z.run_with(&sh_v, m_total, v0, v1, v2);
 
     assert_eq!(pipeline_z.frame_buffer, pipeline_no_z.frame_buffer);
 }
