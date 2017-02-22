@@ -406,7 +406,6 @@ fn make_camera(width: usize, height: usize) -> Matrix4<f32> {
         WorldToRasterBuilder::new().with_world_to_camera(wtoc_builder)
                                    .with_perspective(per_builder)
                                    .with_viewport(vp_builder);
-    let m_total = wtor_builder.build();
 
     wtor_builder.build()
 }

@@ -1,13 +1,12 @@
 use shader::texture::TextureMap;
 use nalgebra::{Vector2, Vector3, Point3};
 use num_traits::Float;
-use num_integer::Integer;
 use alga::general::Real;
 use std::marker::PhantomData;
 
 
 ///
-/// Convenience function for creating a new `CheckerboardShader`.
+/// Factory function for creating a new `CheckerboardShader`.
 ///
 pub fn shader<N: Float + Real>(n_squares: usize) -> CheckerboardShader<N> {
     CheckerboardShader::new(n_squares)
@@ -61,28 +60,6 @@ macro_rules! checkerboard_impl {
 checkerboard_impl!(f32);
 checkerboard_impl!(f64);
 
-// TODO: Clean up this generic texture code.
-/*
-impl<N> TextureMap<N, Args<N>> for CheckerboardShader
-    where N: Float + Real + From<u16>
-{    
-    fn apply(&self, args: Args<N>) -> Vector3<N> {
-        let _1 = N::one();
-        let _1_div_2 = _1 / (_1 + _1);
-
-        let z  = _1 / ((args.6)[0]*(args.3)[2] + (args.6)[1]*(args.4)[2] + (args.6)[2]*(args.5)[2]);
-
-        let s = z * ((args.6)[0]*(args.0)[0] + (args.6)[1]*(args.1)[0] + (args.6)[2]*(args.2)[0]);
-        let t = z * ((args.6)[0]*(args.0)[1] + (args.6)[1]*(args.1)[1] + (args.6)[2]*(args.2)[1]);
-
-        let m = N::from(self.n_squares);
-
-        let p = ((((s * m % _1 > _1_div_2).into::<usize>()) ^ (t * m % _1 < _1_div_2).into::<U>())).into::<N>();
-
-        Vector3::new(p,p,p)
-    }
-}
-*/
 
 specific_fn_impl!(CheckerboardShader<f32>, f32, Args<f32>);
 specific_fn_impl!(CheckerboardShader<f64>, f64, Args<f64>);

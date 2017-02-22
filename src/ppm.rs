@@ -27,12 +27,9 @@ impl NetPBM {
 
     fn file_extension(&self) -> &str {
         match *self {
-            NetPBM::BitMapAscii   => "pbm",
-            NetPBM::GrayMapAscii  => "pgm",
-            NetPBM::PixMapAscii   => "ppm",
-            NetPBM::BitMapBinary  => "pbm",
-            NetPBM::GrayMapBinary => "pgm",
-            NetPBM::PixMapBinary  => "ppm",
+            NetPBM::BitMapAscii  | NetPBM::BitMapBinary  => "pbm",
+            NetPBM::GrayMapAscii | NetPBM::GrayMapBinary => "pgm",
+            NetPBM::PixMapAscii  | NetPBM::PixMapBinary  => "ppm",
         }
     }
 }
@@ -49,8 +46,7 @@ impl ColorType {
     fn max_pixel_value(&self) -> usize {
         match *self {
             ColorType::BitMap => 1,
-            ColorType::Gray   => 255,
-            ColorType::Rgb    => 255,
+            ColorType::Gray | ColorType::Rgb => 255,
         }
     }
 }
@@ -75,12 +71,9 @@ impl<'a, W> NetPBMEncoder<'a, W> where W: 'a + io::Write {
     {
         // Calculate pixel color type.
         let pixel_type = match self.enc_type {
-            NetPBM::BitMapAscii   => ColorType::BitMap,
-            NetPBM::GrayMapAscii  => ColorType::Gray,
-            NetPBM::PixMapAscii   => ColorType::Rgb,
-            NetPBM::BitMapBinary  => ColorType::BitMap,
-            NetPBM::GrayMapBinary => ColorType::Gray,
-            NetPBM::PixMapBinary  => ColorType::Rgb,
+            NetPBM::BitMapAscii | NetPBM::BitMapBinary   => ColorType::BitMap,
+            NetPBM::GrayMapAscii | NetPBM::GrayMapBinary => ColorType::Gray,
+            NetPBM::PixMapAscii | NetPBM::PixMapBinary   => ColorType::Rgb,
         };
         self.__encode(image, width, height, pixel_type)
     }
@@ -91,8 +84,8 @@ impl<'a, W> NetPBMEncoder<'a, W> where W: 'a + io::Write {
                 height: u32,
                 pixel_type: ColorType) -> io::Result<()>
     {
-        let _ = try!(self.write_magic_number());
-        let _ = try!(self.write_header(width, height, pixel_type));
+        try!(self.write_magic_number());
+        try!(self.write_header(width, height, pixel_type));
 
         self.write_image(image, width, height, pixel_type)
     }
@@ -118,28 +111,28 @@ impl<'a, W> NetPBMEncoder<'a, W> where W: 'a + io::Write {
                 for line in image.chunks(width as usize) {
                     for pixel in line {
                         if *pixel == 0 {
-                            let _ = try!(write!(self.writer, "0 "));
+                            try!(write!(self.writer, "0 "));
                         } else {
-                            let _ = try!(write!(self.writer, "1 "));
+                            try!(write!(self.writer, "1 "));
                         }
                     }
-                    let _ = try!(write!(self.writer, "\n"));
+                    try!(write!(self.writer, "\n"));
                 }
             }
             ColorType::Gray => {
                 for i in 0..height as usize {
                     for j in 0..width as usize {
-                        let _ = try!(write!(self.writer, "{} ", image[(width as usize) * i + j]));
+                        try!(write!(self.writer, "{} ", image[(width as usize) * i + j]));
                     }
-                    let _ = try!(self.writer.write_all("\n".as_bytes()));
+                    try!(self.writer.write_all("\n".as_bytes()));
                 }
             }
             ColorType::Rgb => {
                 for line in image.chunks(3 * width as usize) {
                     for pixel in line.chunks(3) {
-                        let _ = try!(write!(self.writer, "{} {} {} ", pixel[0], pixel[1], pixel[2]));
+                        try!(write!(self.writer, "{} {} {} ", pixel[0], pixel[1], pixel[2]));
                     }
-                    let _ = write!(self.writer, "\n");
+                    try!(write!(self.writer, "\n"));
                 }
             }
         }

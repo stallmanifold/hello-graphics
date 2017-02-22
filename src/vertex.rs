@@ -1,4 +1,4 @@
-use nalgebra::{Vector2, Vector3, Point3};
+use nalgebra::{Vector3, Point3};
 use alga::general::Real;
 use num_traits::Float;
 

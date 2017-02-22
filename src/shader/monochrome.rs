@@ -2,11 +2,10 @@ use shader::texture::TextureMap;
 use nalgebra::{Vector3, Point3};
 use num_traits::Float;
 use alga::general::Real;
-use std::marker::PhantomData;
 
 
 ///
-/// Convenience function for creating a new `MonochromeShader`.
+/// Factory function for creating a new `MonochromeShader`.
 ///
 pub fn shader<N: Float + Real>(color: Vector3<N>) -> MonochromeShader<N> {
     MonochromeShader::new(color)
@@ -31,6 +30,7 @@ impl<N> TextureMap<N, Args<N>> for MonochromeShader<N> where N: Float + Real {
     /// 
     /// Compute the monochrome shading of a triangle primitive.
     ///
+    #[allow(unused_variables)]
     fn apply(&self, args: Args<N>) -> Vector3<N> {
         self.color
     }
