@@ -86,15 +86,7 @@ impl MockGraphicsPipelineWithoutZBuffer {
         let width  = self.frame_buffer.width();
 
         let area: f32 = raster::compute_area(&v0, &v1, &v2);
-/*
-        let v0_vp = m_wtor * (v0.to_homogeneous());
-        let v1_vp = m_wtor * (v1.to_homogeneous());
-        let v2_vp = m_wtor * (v2.to_homogeneous());
 
-        let v0_rast: Point3<f32> = Point3::from_homogeneous(v0_vp).unwrap();
-        let v1_rast: Point3<f32> = Point3::from_homogeneous(v1_vp).unwrap();
-        let v2_rast: Point3<f32> = Point3::from_homogeneous(v2_vp).unwrap();
-*/
         // Render the scene without z-buffering.
         for i in 0..height {
             for j in 0..width {
