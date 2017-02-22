@@ -31,9 +31,6 @@ impl MockGraphicsPipelineWithZBuffer {
     }
 
     fn run_with(&mut self, shader: MockShader, m_wtor: Matrix4<f32>, v0: Point3<f32>, v1: Point3<f32>, v2: Point3<f32>) {
-        // Clear out buffers.
-        self.reinitialize();
-
         let height = self.frame_buffer.height();
         let width  = self.frame_buffer.width();
 
@@ -88,9 +85,6 @@ impl MockGraphicsPipelineWithoutZBuffer {
     }
 
     fn run_with(&mut self, shader: MockShader, m_wtor: Matrix4<f32>, v0: Point3<f32>, v1: Point3<f32>, v2: Point3<f32>) {
-        // Clear out buffers.
-        self.reinitialize();
-
         let height = self.frame_buffer.height();
         let width  = self.frame_buffer.width();
 
@@ -380,21 +374,8 @@ impl WorldToRasterBuilder {
     }
 }
 
-// This test runs through the rendering of one triangle primitive from its placement in
-// world space to the pixel values being written to the frame buffer. We then check that
-// the state of the graphics system makes sense when it is hypothetically displayed on screen.
-// In this case, the z buffer should not affect the output with only one triangle.
-#[test]
-fn test_z_buffer_should_not_affect_rendering_with_one_primitive() {
-    // Initialize a z-axis aligned triangle in world space.
-    
-    let v0: Point3<f32> = Point3::new(30.0, 30.0, 0.0);
-    let v1: Point3<f32> = Point3::new(30.0, -30.0, 0.0);
-    let v2: Point3<f32> = Point3::new(-30.0, -30.0, 0.0);
-
-    let width: usize = 256;
-    let height: usize = 256;
-
+/// Each integration test uses the same camera parameters.
+fn make_camera(width: usize, height: usize) -> Matrix4<f32> {
     // Given a camera focal point on the z axis x units in the 
     // positive z direction. This puts it in front of the triangle that way.
     // The gaze direction is the -z axis.
@@ -427,28 +408,66 @@ fn test_z_buffer_should_not_affect_rendering_with_one_primitive() {
                                    .with_viewport(vp_builder);
     let m_total = wtor_builder.build();
 
+    wtor_builder.build()
+}
+
+// This test runs through the rendering of one triangle primitive from its placement in
+// world space to the pixel values being written to the frame buffer. We then check that
+// the state of the graphics system makes sense when it is hypothetically displayed on screen.
+// In this case, the z buffer should not affect the output with only one triangle.
+#[test]
+fn test_z_buffer_should_not_affect_rendering_with_one_primitive() {
+    // GIVEN: A scene with exactly one triangle primitive.
+    let v0: Point3<f32> = Point3::new(30.0, 30.0, 0.0);
+    let v1: Point3<f32> = Point3::new(30.0, -30.0, 0.0);
+    let v2: Point3<f32> = Point3::new(-30.0, -30.0, 0.0);
+
+    let width: usize = 512;
+    let height: usize = 512;
+
+    let m_total = make_camera(width, height);
     let mut pipeline_z = make_pipeline_with_z_buffer(width, height);
     let mut pipeline_no_z = make_pipeline_without_z_buffer(width, height);
 
+    // WHEN: The scene is rendered using z-buffering.
     pipeline_z.run(m_total, v0, v1, v2);
     pipeline_no_z.run(m_total, v0, v1, v2);
 
-    // Since we are only rendering one triangle primitive, the frame buffers should
-    // agree with each other (i.e. the z buffer did not filter out any fragments.)
-    assert_eq!(pipeline_z.frame_buffer, pipeline_no_z.frame_buffer);
-    // The Z-buffering code actually wrote something in.
+    // THEN: The Z-buffered pipeline should actually render something.
     let zero = frame_buffer::frame_buffer(width, height);
     assert_ne!(pipeline_z.frame_buffer, zero);
+    assert_ne!(pipeline_no_z.frame_buffer, zero);
+
+    // THEN: The z-buffered pipeline should render the entire triangle
+    //       just like the pipeline without z-buffering.
+    assert_eq!(pipeline_z.frame_buffer, pipeline_no_z.frame_buffer);
 }
 
 #[test]
 fn test_z_buffer_should_give_same_results_as_rendering_objects_back_to_front() {
-    // Set up the scene to be rendered.
-    // Create mock graphics pipeline with z Z-buffering.
-    // Create mock graphics pipeline without z buffering.
-    // run Z-buffered pipeline
-    // run non-z-buffered pipeline.
-    // the contents of the z-buffered pipeline frame buffer and the non-z-buffered pipeline must 
-    // satisfy the desired properties to be tested.
-    assert_eq!(true, true);
+    // GIVEN: A scene with two triangles ordered back to front.
+    let u0: Point3<f32> = Point3::new(30.0, 30.0, 0.0);
+    let u1: Point3<f32> = Point3::new(0.0, -30.0, 0.0);
+    let u2: Point3<f32> = Point3::new(-30.0, 30.0, 0.0);
+
+    let v0: Point3<f32> = Point3::new(20.0, 20.0, 0.0);
+    let v1: Point3<f32> = Point3::new(20.0, -20.0, 0.0);
+    let v2: Point3<f32> = Point3::new(-20.0, -20.0, 0.0);
+
+    let width: usize = 512;
+    let height: usize = 512;
+
+    let m_total = make_camera(width, height);
+    let mut pipeline_z = make_pipeline_with_z_buffer(width, height);
+    let mut pipeline_no_z = make_pipeline_without_z_buffer(width, height);
+
+    // WHEN: The scene is rendered using z-buffering.
+    pipeline_z.run(m_total, v0, v1, v2);
+    pipeline_z.run(m_total, u0, u1, u2);
+
+    // THEN: The scene should be rendered as though the triangles were rendered in back to front order without the z buffer.
+    pipeline_no_z.run(m_total, u0, u1, u2);
+    pipeline_no_z.run(m_total, v0, v1, v2);
+
+    assert_eq!(pipeline_z.frame_buffer, pipeline_no_z.frame_buffer);
 }
