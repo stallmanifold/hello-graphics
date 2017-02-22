@@ -54,7 +54,7 @@ impl MockGraphicsPipelineWithZBuffer {
                     // Do the z-buffer test.
                     let one_over_z: f32 = w[0] * v0_rast.z + w[1] * v1_rast.z + w[2] * v2_rast.z;
                     let z: f32 = 1.0 / one_over_z;
-                    if z < (*self.z_buffer)[i][j] {
+                    if self.z_buffer.test(z, i, j) {
                         (*self.z_buffer)[i][j] = z;
                         // Write a shader value into the frame buffer.
                         let color = shader(w);

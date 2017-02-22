@@ -63,6 +63,10 @@ impl<N> ZBuffer<N> where N: Float + Real {
         self.height
     }
 
+    pub fn test(&self, z: N, i: usize, j: usize) -> bool {
+        z < self[i][j]
+    }
+
     fn lines(&self) -> ZBufferLineIter<N> {
         ZBufferLineIter {
             index: 0,
