@@ -16,4 +16,5 @@ pub mod camera;
 mod util;
 pub mod shader;
 pub mod color;
-mod ppm;
+pub mod shape;
+pub mod ppm;
