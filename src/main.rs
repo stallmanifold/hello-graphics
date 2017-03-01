@@ -18,6 +18,7 @@ mod ppm;
 mod shader;
 mod vertex;
 mod camera;
+mod shape;
 
 use nalgebra::{Vector2, Vector3, Point3};
 use z_buffer::ZBuffer;

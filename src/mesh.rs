@@ -65,7 +65,7 @@ impl<N> AsRef<[Vertex<N>]> for VertexMap<N> where N: Float + Real {
 /// A Face is a triangle on the outside of a simplex. The face stores the
 /// vertices in clockwise order.
 #[derive(Copy, Clone, Debug, Eq, PartialEq)]
-struct Face<N> {
+pub struct Face<N> {
     pub v0: VertexIdx,
     pub v1: VertexIdx,
     pub v2: VertexIdx,
@@ -73,7 +73,7 @@ struct Face<N> {
 }
 
 impl<N> Face<N> {
-    fn new(v0: VertexIdx, v1: VertexIdx, v2: VertexIdx) -> Face<N> {
+    pub fn new(v0: VertexIdx, v1: VertexIdx, v2: VertexIdx) -> Face<N> {
         Face {
             v0: v0,
             v1: v1,
@@ -82,7 +82,7 @@ impl<N> Face<N> {
         }
     }
 
-    fn len(&self) -> usize {
+    pub fn len(&self) -> usize {
         3
     }
 }
@@ -163,14 +163,14 @@ impl<N> AsRef<[Face<N>]> for FaceMap<N> {
 /// changing much, we would have to switch to something like a wing-edge
 /// graph to represent the edges and faces of the simplices to make them
 /// easy to manipulate dynamically, i.e. creating and deleting lots of triangles.
-struct Mesh<N> where N: Float + Real {
+pub struct Mesh<N> where N: Float + Real {
     vertex_table: VertexMap<N>,
     face_table: FaceMap<N>,
 }
 
 impl<N> Mesh<N> where N: Float + Real {
     /// Create a mesh with at most `n_verts` vertices, and `n_faces` faces.
-    fn with_dims(n_verts: usize, n_faces: usize) -> Mesh<N> {
+    pub fn with_dims(n_verts: usize, n_faces: usize) -> Mesh<N> {
         Mesh {
             vertex_table: VertexMap::with_capacity(n_verts),
             face_table:   FaceMap::with_capacity(n_faces),
@@ -178,28 +178,28 @@ impl<N> Mesh<N> where N: Float + Real {
     }
 
     #[inline]
-    fn vertex_count(&self) -> usize {
+    pub fn vertex_count(&self) -> usize {
         self.vertex_table.len()
     }
 
     #[inline]
-    fn face_count(&self) -> usize {
+    pub fn face_count(&self) -> usize {
         self.face_table.len()
     }
 
-    fn push_vertex(&mut self, vertex: Vertex<N>) {
+    pub fn push_vertex(&mut self, vertex: Vertex<N>) {
         self.vertex_table.push(vertex);
     }
 
-    fn push_face(&mut self, face: &Face<N>) {
+    pub fn push_face(&mut self, face: &Face<N>) {
         self.face_table.push(face);
     }
 
-    fn vertices(&self) -> &[Vertex<N>] {
+    pub fn vertices(&self) -> &[Vertex<N>] {
         self.vertex_table.as_slice()
     }
 
-    fn faces(&self) -> &[Face<N>] {
+    pub fn faces(&self) -> &[Face<N>] {
         self.face_table.as_slice()
     }
 }
