@@ -2,7 +2,7 @@ use mesh::Mesh;
 use nalgebra::{Vector3, Point3};
 
 
-type Triangle<N> = Mesh<N>;
+type Triangle<N> = Mesh<N> where N: Real + Float;
 
 pub fn create(v0: Point3<N>, v1: Point3<N>, v2: Point3<N>) -> Triangle<N> {
     let mut mesh = Mesh::with_dims(3, 1);

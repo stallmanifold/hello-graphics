@@ -1,7 +1,7 @@
 use nalgebra::{Vector3, Point3};
 use mesh::Mesh;
 
-type Plane<N> = Mesh<N>;
+type Plane<N> = Mesh<N> where N: Real + Float;
 
 pub fn create(bottom_left: Point3<N>, top_left: Point3<N>, bottom_right: Point3<N>) -> Plane<N> {
     let v0 = bottom_left;
