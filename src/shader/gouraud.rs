@@ -45,7 +45,7 @@ mod tests {
     use alga::general::Real;
 
     /// 
-    /// Compute the gouraud shading of a triangle primitive.
+    /// Compute the Gouraud shading of a triangle primitive.
     ///
     pub fn gouraud<N>(color0: Vector3<N>, 
                       color1: Vector3<N>, 
