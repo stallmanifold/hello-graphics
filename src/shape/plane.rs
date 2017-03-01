@@ -15,7 +15,7 @@ pub fn create<N: Real + Float>(bottom_left: Point3<N>,
     let v3 = bottom_right;
 
     let face0 = Face::new(0, 1, 3);
-    let face1 = Face::new(1, 2, 3);
+    let face1 = Face::new(3, 1, 2);
 
     let mut mesh = Mesh::with_dims(4, 2);
 

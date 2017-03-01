@@ -1,5 +1,5 @@
 mod cube;
 mod normal;
-mod plane;
+pub mod plane;
 mod tetrahedron;
-mod triangle;
+pub mod triangle;
