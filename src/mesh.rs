@@ -73,6 +73,15 @@ struct Face<N> {
 }
 
 impl<N> Face<N> {
+    fn new(v0: VertexIdx, v1: VertexIdx, v2: VertexIdx) -> Face<N> {
+        Face {
+            v0: v0,
+            v1: v1,
+            v2: v2,
+            _phantom: PhantomData,
+        }
+    }
+
     fn len(&self) -> usize {
         3
     }
